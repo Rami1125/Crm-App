@@ -69,15 +69,18 @@ const dom = {
 // ===== 3. APPLICATION INITIALIZATION =====
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM loaded. Initializing app...");
     const params = new URLSearchParams(window.location.search);
     const clientId = params.get('id');
 
     if (!clientId) {
-        showError('שגיאה: לא זוהה מספר לקוח.');
+        showError('שגיאה: לא זוהה מספר לקוח. יש לוודא שהכתובת כוללת `?id=NUMBER`');
         return;
     }
+    
+    console.log(`Client ID found: ${clientId}`);
 
-    // Initialize Firebase and then load client data
+    // Initialize Firebase
     try {
         if (typeof firebase !== 'undefined' && !firebase.apps.length) {
             firebase.initializeApp(FIREBASE_CONFIG);
@@ -100,29 +103,47 @@ document.addEventListener('DOMContentLoaded', () => {
  * @param {string} clientId - The ID of the client to fetch data for.
  */
 async function loadClientData(clientId) {
+    console.log(`Attempting to fetch data for client ID: ${clientId} from ${API_URL}`);
     try {
         const response = await fetch(`${API_URL}?id=${clientId}`);
-        
+        console.log("Fetch response received:", response);
+
         if (!response.ok) {
-            // Handle HTTP errors like 404 or 500
-            throw new Error(`שגיאת שרת: ${response.status}`);
+            throw new Error(`שגיאת רשת (HTTP Status): ${response.status}`);
         }
         
-        const data = await response.json();
+        // DEBUG: Log the raw text to see exactly what the server sent
+        const rawText = await response.text();
+        console.log("Raw response text from server:", rawText);
+
+        // Attempt to parse the text as JSON
+        let data;
+        try {
+            data = JSON.parse(rawText);
+        } catch (jsonError) {
+            console.error("Error parsing JSON:", jsonError);
+            throw new Error("השרת החזיר תשובה שאינה בפורמט JSON תקין.");
+        }
+        
+        console.log("Parsed data object:", data);
 
         if (data.error) {
-            // Handle application-specific errors from the API
-            throw new Error(data.error);
+            throw new Error(`שגיאה מה-API: ${data.error}`);
         }
 
         updateUI(data);
 
         dom.loader.classList.add('hidden');
         dom.appContent.classList.remove('hidden');
+        console.log("UI updated successfully.");
 
     } catch (error) {
-        console.error('Error loading client data:', error);
-        showError(`אופס, משהו השתבש בטעינת הנתונים. (${error.message})`);
+        console.error('CRITICAL ERROR during data loading:', error);
+        let friendlyMessage = `אופס, משהו השתבש בטעינת הנתונים. (${error.message})`;
+        if (error.message.includes('Failed to fetch')) {
+             friendlyMessage = "שגיאת רשת. ודא שיש חיבור לאינטרנט ושכתובת ה-API נכונה.";
+        }
+        showError(friendlyMessage);
     }
 }
 
@@ -131,7 +152,9 @@ async function loadClientData(clientId) {
  * @param {string} message - The error message to display.
  */
 function showError(message) {
-    dom.loader.innerHTML = `<p style="color: var(--danger-color);">${message}</p>`;
+    dom.loader.classList.remove('hidden'); // Make sure loader area is visible
+    dom.appContent.classList.add('hidden');
+    dom.loader.innerHTML = `<div class="card" style="border-color: var(--danger-color);"><h2 style="color: var(--danger-color);">שגיאה</h2><p>${message}</p><p>אנא בדוק את הקונסול (F12) לפרטים נוספים.</p></div>`;
 }
 
 // ===== 5. UI UPDATES =====
@@ -143,10 +166,14 @@ function showError(message) {
 function updateUI(data) {
     const { clientInfo, activeOrder, orderHistory } = data;
 
-    // Update client name
+    if (!clientInfo || !orderHistory) {
+        console.error("Data object is missing required keys (clientInfo, orderHistory). Received:", data);
+        showError("מבנה הנתונים שהתקבל מהשרת אינו תקין.");
+        return;
+    }
+
     dom.clientName.textContent = clientInfo.name ? `שלום, ${clientInfo.name}` : 'לקוח יקר';
 
-    // Update active order section
     if (activeOrder && Object.keys(activeOrder).length > 0) {
         dom.activeOrderSection.classList.remove('hidden');
         dom.noActiveOrder.classList.add('hidden');
@@ -163,7 +190,6 @@ function updateUI(data) {
         dom.noActiveOrder.classList.remove('hidden');
     }
 
-    // Update order history
     renderOrderHistory(orderHistory);
 }
 
@@ -240,7 +266,6 @@ function handleAction(actionType) {
  * @param {string} clientId - The current client's ID.
  */
 function setupNotifications(messaging, clientId) {
-    // Don't show prompt if permission is already granted or denied
     if (Notification.permission === 'granted') {
         retrieveToken(messaging, clientId);
         return;
@@ -250,7 +275,6 @@ function setupNotifications(messaging, clientId) {
         return;
     }
 
-    // Show prompt after a delay
     setTimeout(() => {
         dom.notificationPrompt.classList.remove('hidden');
     }, 3000);
@@ -301,7 +325,6 @@ function sendTokenToServer(clientId, token) {
     console.log(`Sending token to server for client ${clientId}`);
     fetch(API_URL, {
         method: 'POST',
-        // Google Apps Script doPost requires a string payload and a specific content type
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({
             action: 'saveToken',
