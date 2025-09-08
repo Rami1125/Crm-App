@@ -19,7 +19,7 @@
  * @desc The URL of the Google Apps Script web app that serves the client data.
  * @type {string}
  */
-const API_URL = 'https://script.google.com/macros/s/AKfycbybXeFukeArIKrWkW0YpPfozdWk-GRn1kY5MKtcVMJouhYLkgB7NnA96HQ9LSM_ef__Ng/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzvd34ZpiA3bhi0b_AmyTSoFCTp2D_AYGcKBrNFojaQLvjNmhX9iPzH3GcmiTnuicKMOg/exec';
 
 /**
  * @desc Firebase configuration object for push notifications.
