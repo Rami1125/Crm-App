@@ -6,7 +6,7 @@
 
 // --- 1. CONFIGURATION & SETUP ---
 // Instructions: Replace this URL with your own Google Apps Script deployment URL.
-const API_URL = 'https://script.google.com/macros/s/AKfycbxvXQbhKczchtz5Tj7BY_ODuadA6P2uodFzVJHyOjDg95bP1STzmNiZ0SBf2TWKFVnPwQ/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycby0cx9Esp6sRYh6N_8FXuqDN-FbjIVOpuO2AHcB6MMsHqKqMEaPZED-X31FmBVL0lEBKw/exec';
 
 // Instructions: Replace this with your actual Firebase project configuration.
 // This is required for Push Notifications to work.
