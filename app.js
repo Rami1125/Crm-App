@@ -5,7 +5,7 @@
  */
 
 // --- 1. CONFIGURATION & SETUP ---
-const API_URL = 'https://script.google.com/macros/s/AKfycbx5Wu5wPWnRI8tRT93KYxSeRNDxlyjwUi2lAr7Qg5G9AHKgcUDJpbSUPcNRdalqYEZv/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzldGUaX-PP-_w7PiX5s3v0XD72XkPwZDnPvqNeC4_wKrjWdZDPbgbLg4l1rz_ms4iX/exec';
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBV_2JwCLtow5F6C7463NmfP2py5W-fj5I",
     authDomain: "hsaban94-cc777.firebaseapp.com",
@@ -20,12 +20,10 @@ let currentClient = {
     id: null,
     name: null
 };
-let etaInterval = null;
 
 // --- 3. DOM ELEMENT SELECTORS ---
 const dom = {
     loader: document.getElementById('loader'),
-    appContainer: document.querySelector('.app-container'),
     appContent: document.getElementById('app-content'),
     clientName: document.getElementById('client-name'),
     activeOrderSection: document.getElementById('active-order-section'),
@@ -34,7 +32,6 @@ const dom = {
     orderAddress: document.getElementById('order-address'),
     orderId: document.getElementById('order-id'),
     daysOnSite: document.getElementById('days-on-site'),
-    endDate: document.getElementById('end-date'),
     lastAction: document.getElementById('last-action'),
     historyList: document.getElementById('history-list'),
     requestSwapBtn: document.getElementById('request-swap-btn'),
@@ -46,8 +43,6 @@ const dom = {
     progressStartDate: document.getElementById('progress-start-date'),
     progressEndDate: document.getElementById('progress-end-date'),
     toastContainer: document.getElementById('toast-container'),
-    driverStatusOverlay: document.getElementById('driver-status-overlay'),
-    etaTimer: document.getElementById('eta-timer'),
 };
 
 // --- 4. APPLICATION INITIALIZATION ---
@@ -89,78 +84,56 @@ async function loadClientData(clientId) {
     }
 }
 
-/**
- * Updates the User Interface with the data received from the API.
- * ⭐ NEW: This version includes robust checks to prevent errors if DOM elements are missing.
- * @param {object} data The structured data object for the client.
- */
 function updateUI(data) {
     try {
-        console.log("Starting UI update...");
-        const clientInfo = data.clientInfo || { name: 'לקוח יקר' };
-        const activeOrder = data.activeOrder;
-        const orderHistory = data.orderHistory || [];
+        const { clientInfo, activeOrder, orderHistory } = data;
 
-        // Check for driver status first
-        if (activeOrder && activeOrder.driverStatus === 'en_route' && activeOrder.eta) {
-            showDriverStatusScreen(activeOrder.eta);
-            return; 
-        }
-        showMainAppScreen();
-    
-        // --- Client Info ---
-        if (dom.clientName) {
-            currentClient.name = clientInfo.name || 'לקוח יקר';
-            dom.clientName.textContent = `שלום, ${currentClient.name}`;
-            console.log("Client name updated.");
-        } else {
-            console.error("DOM element #client-name not found.");
-        }
+        currentClient.name = clientInfo.name || 'לקוח יקר';
+        if(dom.clientName) dom.clientName.textContent = `שלום, ${currentClient.name}`;
 
-        // --- Active Order Section ---
         if (activeOrder && activeOrder.orderId) {
             if(dom.activeOrderSection) dom.activeOrderSection.style.display = 'block';
             if(dom.noActiveOrder) dom.noActiveOrder.style.display = 'none';
-
-            if(dom.statusBadge) {
-                dom.statusBadge.textContent = activeOrder.status || 'לא ידוע';
-                dom.statusBadge.className = `status-badge ${getBadgeClass(activeOrder.status)}`;
-            }
+            if(dom.statusBadge) dom.statusBadge.textContent = activeOrder.status || 'לא ידוע';
+            if(dom.statusBadge) dom.statusBadge.className = `status-badge ${getBadgeClass(activeOrder.status)}`;
             if(dom.orderAddress) dom.orderAddress.textContent = activeOrder.address || 'לא צוינה';
             if(dom.orderId) dom.orderId.textContent = activeOrder.orderId || 'N/A';
             if(dom.daysOnSite) dom.daysOnSite.textContent = activeOrder.daysOnSite || '0';
             if(dom.lastAction) dom.lastAction.textContent = activeOrder.lastAction || 'N/A';
-            
             updateProgressBar(activeOrder);
-            console.log("Active order section populated.");
         } else {
             if(dom.activeOrderSection) dom.activeOrderSection.style.display = 'none';
             if(dom.noActiveOrder) dom.noActiveOrder.style.display = 'block';
-            console.log("No active order found. Displaying 'no order' message.");
         }
 
-        // --- Order History ---
-        if (dom.historyList) {
+        if(dom.historyList){
             dom.historyList.innerHTML = '';
-            if (orderHistory.length > 0) {
+            if (orderHistory && orderHistory.length > 0) {
                 const historyFragment = document.createDocumentFragment();
                 orderHistory.forEach(order => {
                     const item = document.createElement('div');
                     item.className = 'history-item';
-                    item.innerHTML = `...`; // Content omitted for brevity, same as before
+                    item.innerHTML = `
+                        <div class="icon-wrapper">
+                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path fill="currentColor" d="M13 2v7h7z"/></svg>
+                        </div>
+                        <div class="details">
+                            <div class="title"><strong>${order.action || 'פעולה'}</strong> - תעודה: ${order.orderId || 'N/A'}</div>
+                            <div class="meta">
+                                <span>${order.date || 'אין תאריך'}</span><span class="separator">•</span><span>${order.address || 'אין כתובת'}</span>
+                            </div>
+                        </div>
+                        <div class="status-tag-wrapper">
+                            <span class="status-tag ${getBadgeClass(order.status)}">${order.status || 'לא ידוע'}</span>
+                        </div>
+                    `;
                     historyFragment.appendChild(item);
                 });
                 dom.historyList.appendChild(historyFragment);
-                console.log("History section populated.");
             } else {
                 dom.historyList.innerHTML = '<div class="empty-state">לא נמצאה היסטוריית הזמנות.</div>';
             }
-        } else {
-             console.error("DOM element #history-list not found.");
         }
-        
-        console.log('UI update process finished.');
-
     } catch (error) {
         console.error("A critical error occurred within the main updateUI function:", error);
         showError('שגיאה קריטית בעדכון הממשק.');
@@ -177,66 +150,196 @@ if(dom.cancelNotificationsBtn) dom.cancelNotificationsBtn.addEventListener('clic
 });
 
 async function handleAction(actionType) {
-    // ... (same as before)
+    const actionText = actionType === 'swap' ? 'החלפה' : 'פינוי';
+    
+    const btn = actionType === 'swap' ? dom.requestSwapBtn : dom.requestRemovalBtn;
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'logClientRequest',
+                clientId: currentClient.id,
+                clientName: currentClient.name,
+                requestType: actionType
+            })
+        });
+        if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
+        
+        const result = await response.json();
+        if (result.status !== 'success') throw new Error(result.message);
+
+        btn.classList.remove('loading');
+        btn.classList.add('success');
+        btn.innerHTML = `
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+            הבקשה נשלחה
+        `;
+        showToast('הבקשה נשלחה בהצלחה!', 'success');
+
+    } catch (error) {
+        console.error('Failed to send action request:', error);
+        showToast(`אופס, שליחת הבקשה נכשלה. (${error.message})`, 'error');
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        // Restore original button text and icons
+        if (actionType === 'swap') {
+            btn.innerHTML = `<svg class="icon" ...>...</svg> בקש החלפה`;
+        } else {
+            btn.innerHTML = `<svg class="icon" ...>...</svg> בקש פינוי`;
+        }
+    } 
 }
 
 // --- 7. HELPER & UI FUNCTIONS ---
 function updateProgressBar(order) {
     if (!dom.progressBar || !dom.progressStartDate || !dom.progressEndDate || !order.startDate || !order.endDate) return;
     try {
-        // ... (same as before)
+        const start = new Date(order.startDate.split('/').reverse().join('-'));
+        const end = new Date(order.endDate.split('/').reverse().join('-'));
+        const today = new Date();
+        
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) {
+            dom.progressBar.style.width = '0%';
+            return;
+        }
+        const totalDuration = (end - start) / (1000 * 60 * 60 * 24);
+        const elapsedDuration = (today - start) / (1000 * 60 * 60 * 24);
+        let percentage = totalDuration > 0 ? (elapsedDuration / totalDuration) * 100 : 0;
+        percentage = Math.max(0, Math.min(percentage, 100));
+        dom.progressBar.style.width = percentage + '%';
+        if (percentage > 80) { dom.progressBar.className = 'progress-bar danger'; } 
+        else if (percentage > 50) { dom.progressBar.className = 'progress-bar warning'; } 
+        else { dom.progressBar.className = 'progress-bar success'; }
+        dom.progressStartDate.textContent = order.startDate;
+        dom.progressEndDate.textContent = order.endDate;
     } catch(e) {
         console.error("Could not parse dates for progress bar:", order.startDate, order.endDate);
     }
 }
 
 function showLoader(visible, text = '') {
-    // ... (same as before)
+    if (dom.loader) {
+        dom.loader.style.display = visible ? 'flex' : 'none';
+        if (visible) dom.loader.querySelector('p').textContent = text;
+    }
+    if (dom.appContent) {
+        dom.appContent.style.visibility = visible ? 'hidden' : 'visible';
+        if (!visible) dom.appContent.classList.add('fade-in');
+    }
 }
 
 function showError(message) {
-    // ... (same as before)
+    if (dom.loader) {
+        dom.loader.innerHTML = `<div class="error-state">${message}</div>`;
+        dom.loader.style.display = 'flex';
+    }
+    if (dom.appContent) {
+        dom.appContent.style.display = 'none';
+    }
 }
 
 function getBadgeClass(status = "") {
-    // ... (same as before)
+    const s = String(status || "").toLowerCase();
+    if (s.includes('פתוח')) return 'open';
+    if (s.includes('סגור')) return 'closed';
+    return 'default';
 }
 
 function showToast(message, type = 'info') {
-    // ... (same as before)
-}
-
-function showDriverStatusScreen(etaTimestamp) {
-    // ... (same as before)
-}
-
-function showMainAppScreen() {
-    // ... (same as before)
-}
-
-function startEtaTimer(etaTimestamp) {
-    // ... (same as before)
+    if (!dom.toastContainer) return;
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    dom.toastContainer.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+    }, 4000);
 }
 
 
 // --- 8. PUSH NOTIFICATIONS LOGIC ---
 function initializeFirebase(clientId) {
-    // ... (same as before)
+    try {
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(FIREBASE_CONFIG);
+            const messaging = firebase.messaging();
+            setupNotifications(messaging, clientId);
+        } else {
+             console.warn("Firebase SDK not found or already initialized.");
+        }
+    } catch (error) {
+        console.error("Firebase initialization failed:", error);
+    }
 }
 
 function setupNotifications(messaging, clientId) {
-    // ... (same as before)
+    if (Notification.permission === 'granted') {
+        retrieveToken(messaging, clientId);
+        return;
+    }
+    if (Notification.permission === 'denied') { return; }
+    
+    setTimeout(() => {
+        if (dom.notificationModal) dom.notificationModal.style.display = 'flex';
+    }, 3000);
 }
 
 async function requestNotificationPermission() {
-    // ... (same as before)
+    if (dom.notificationModal) dom.notificationModal.style.display = 'none';
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            showToast('אישרת קבלת עדכונים!', 'success');
+            const clientId = new URLSearchParams(window.location.search).get('id');
+            initializeFirebase(clientId);
+        } else {
+            showToast('תוכל להפעיל עדכונים בהגדרות הדפדפן.', 'info');
+        }
+    } catch (error) {
+        console.error('Error requesting notification permission', error);
+    }
 }
 
 async function retrieveToken(messaging, clientId) {
-    // ... (same as before)
+    try {
+        const vapidKey = 'YOUR_VAPID_PUBLIC_KEY'; // Replace with your key
+        const currentToken = await messaging.getToken({ vapidKey: vapidKey });
+
+        if (currentToken) {
+            console.log('FCM Token:', currentToken);
+            sendTokenToServer(clientId, currentToken);
+        }
+    } catch (err) {
+        console.log('An error occurred while retrieving token. ', err);
+    }
 }
 
 async function sendTokenToServer(clientId, token) {
-    // ... (same as before)
+    console.log(`Sending token to server for client ${clientId}...`);
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'saveFCMToken',
+                clientId: clientId,
+                token: token
+            })
+        });
+        if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
+        const result = await response.json();
+        if (result.status !== 'success') throw new Error(result.message);
+        console.log('Token successfully saved on the server.');
+    } catch (error) {
+        console.error('Failed to send token to server:', error);
+    }
 }
 
