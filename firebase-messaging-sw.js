@@ -38,16 +38,56 @@ messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
     // Customize the notification's title and body from the payload.
-    // The structure of 'payload.notification' is determined by how you send the message
-    // from your server (e.g., from the Google Apps Script).
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
         icon: 'https://placehold.co/192x192/0b72b9/FFFFFF?text=סבן', // A default icon
-        badge: 'https://placehold.co/96x96/0b72b9/FFFFFF?text=📦' // Icon for Android notification bar
+        badge: 'https://placehold.co/96x96/0b72b9/FFFFFF?text=📦', // Icon for Android notification bar
+        // **NEW**: Pass data to the notification for the click event.
+        // This allows the server to specify which URL to open upon click.
+        data: {
+            url: payload.data ? payload.data.url : '/'
+        }
     };
 
     // Use the Service Worker's registration to show the notification.
     self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+/**
+ * **NEW**: Notification Click Handler
+ *
+ * This function is triggered when a user clicks on a displayed notification.
+ * Its job is to open the web app and focus the window.
+ */
+self.addEventListener('notificationclick', (event) => {
+    console.log('[firebase-messaging-sw.js] Notification click received.', event.notification);
+
+    // Close the notification pop-up
+    event.notification.close();
+
+    // Get the URL to open from the notification's data property.
+    const urlToOpen = event.notification.data.url || '/';
+
+    // This code looks for an open window with the same URL and focuses it.
+    // If no window is found, it opens a new one.
+    event.waitUntil(
+        clients.matchAll({
+            type: "window",
+            includeUncontrolled: true
+        }).then((clientList) => {
+            // If a window for the app is already open, focus it.
+            for (let i = 0; i < clientList.length; i++) {
+                let client = clientList[i];
+                if (client.url === urlToOpen && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // If no window is open, open a new one.
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
+    );
 });
 
