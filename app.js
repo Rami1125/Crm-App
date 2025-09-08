@@ -5,7 +5,7 @@
  */
 
 // --- 1. CONFIGURATION & SETUP ---
-const API_URL = 'https://script.google.com/macros/s/AKfycbzldGUaX-PP-_w7PiX5s3v0XD72XkPwZDnPvqNeC4_wKrjWdZDPbgbLg4l1rz_ms4iX/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx5Wu5wPWnRI8tRT93KYxSeRNDxlyjwUi2lAr7Qg5G9AHKgcUDJpbSUPcNRdalqYEZv/exec';
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBV_2JwCLtow5F6C7463NmfP2py5W-fj5I",
     authDomain: "hsaban94-cc777.firebaseapp.com",
