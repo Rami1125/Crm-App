@@ -6,17 +6,17 @@
 
 // --- 1. CONFIGURATION & SETUP ---
 // Instructions: Replace this URL with your own Google Apps Script deployment URL.
-const API_URL = 'https://script.google.com/macros/s/AKfycbzldGUaX-PP-_w7PiX5s3v0XD72XkPwZDnPvqNeC4_wKrjWdZDPbgbLg4l1rz_ms4iX/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzldGUaX-PP-_w7PiX5s3v0XD72XkPwZDnPvqNeC4_wKrjWdZDPbgbLg4l1rz_ms4iX/exec'; // This should be your latest deployment URL
 
-// Instructions: Replace this with your actual Firebase project configuration.
-// This is required for Push Notifications to work.
+// Instructions: This is your Firebase project configuration.
+// It is required for Push Notifications to work.
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBV_2JwCLtow5F6C7463NmfP2py5W-fj5I",
     authDomain: "hsaban94-cc777.firebaseapp.com",
     projectId: "hsaban94-cc777",
     storageBucket: "hsaban94-cc777.appspot.com",
     messagingSenderId: "299206369469",
-    appId: "1:299206369469:web:50ca90c58f1981ec9457d4" // Replace with your web app's ID
+    appId: "1:299206369469:web:50ca90c58f1981ec9457d4"
 };
 
 // --- 2. DOM ELEMENT SELECTORS ---
@@ -100,15 +100,12 @@ async function loadClientData(clientId) {
  * @param {object} data The structured data object for the client.
  */
 function updateUI(data) {
-    // Safely access data using optional chaining (?.) and provide default values (||).
     const clientInfo = data.clientInfo || { name: 'לקוח יקר' };
     const activeOrder = data.activeOrder;
     const orderHistory = data.orderHistory || [];
 
-    // --- Client Info ---
     dom.clientName.textContent = `שלום, ${clientInfo.name}`;
 
-    // --- Active Order Section ---
     if (activeOrder && activeOrder.orderId) {
         dom.activeOrderSection.style.display = 'block';
         dom.noActiveOrder.style.display = 'none';
@@ -125,7 +122,6 @@ function updateUI(data) {
         dom.noActiveOrder.style.display = 'block';
     }
 
-    // --- Order History ---
     dom.historyList.innerHTML = '';
     if (orderHistory.length > 0) {
         const historyFragment = document.createDocumentFragment();
@@ -166,11 +162,6 @@ dom.cancelNotificationsBtn.addEventListener('click', () => {
 
 
 // --- 6. HELPER FUNCTIONS ---
-
-/**
- * Handles user actions like requesting a swap or removal.
- * @param {string} actionType - 'swap' or 'removal'.
- */
 function handleAction(actionType) {
     const actionText = actionType === 'swap' ? 'החלפה' : 'פינוי';
     alert(`בקשת ${actionText} נשלחה למערכת. ניצור איתך קשר בהקדם לאישור.`);
@@ -201,7 +192,6 @@ function getBadgeClass(status = "") {
 }
 
 // --- 7. PUSH NOTIFICATIONS LOGIC ---
-
 function initializeFirebase(clientId) {
     try {
         if (typeof firebase !== 'undefined' && !firebase.apps.length) {
@@ -250,6 +240,7 @@ async function retrieveToken(messaging, clientId) {
     try {
         // ⭐️⭐️⭐️ ACTION REQUIRED ⭐️⭐️⭐️
         // Replace "YOUR_VAPID_PUBLIC_KEY" with your key from Firebase Console
+        // Project Settings > Cloud Messaging > Web configuration > "Web Push certificates"
         const vapidKey = 'YOUR_VAPID_PUBLIC_KEY'; 
         const currentToken = await messaging.getToken({ vapidKey: vapidKey });
 
