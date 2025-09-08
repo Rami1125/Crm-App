@@ -41,9 +41,9 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: 'https://placehold.co/192x192/0b72b9/FFFFFF?text=סבן', // A default icon
-        badge: 'https://placehold.co/96x96/0b72b9/FFFFFF?text=📦', // Icon for Android notification bar
-        // NEW: Pass data to the notification for the click event.
+        icon: 'https://img.icons8.com/?size=100&id=9fZ3EWahbXyH&format=png&color=000000', // Main icon
+        badge: 'https://img.icons8.com/?size=100&id=9fZ3EWahbXyH&format=png&color=000000', // Icon for Android notification bar
+        // Pass data to the notification for the click event.
         // This allows the server to specify which URL to open upon click.
         data: {
             url: payload.data ? payload.data.url : '/'
@@ -55,7 +55,7 @@ messaging.onBackgroundMessage((payload) => {
 });
 
 /**
- * NEW: Notification Click Handler
+ * Notification Click Handler
  *
  * This function is triggered when a user clicks on a displayed notification.
  * Its job is to open the web app and focus the window.
@@ -67,7 +67,8 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
     // Get the URL to open from the notification's data property.
-    const urlToOpen = event.notification.data.url || '/';
+    const urlToOpen = new URL(event.notification.data.url || '/', self.location.origin).href;
+
 
     // This code looks for an open window with the same URL and focuses it.
     // If no window is found, it opens a new one.
