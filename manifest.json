@@ -4,18 +4,21 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#f8f9fa",
-    "theme_color": "#0d6efd",
+    "theme_color": "#0b72b9",
     "description": "אפליקציית CRM לניהול ומעקב אחר מכולות של ח. סבן.",
     "icons": [
         {
-            "src": "s('https://www.gstatic.com/firebasejs/8.10.0/firebase-app",
+            "src": "https://img.icons8.com/?size=192&id=9fZ3EWahbXyH&format=png&color=000000",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
-            "src": "https://img.icons8.com/?size=100&id=B0jvWzY3wnBK&format=png&color=000000",
+            "src": "https://img.icons8.com/?size=512&id=9fZ3EWahbXyH&format=png&color=000000",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ]
 }
+
