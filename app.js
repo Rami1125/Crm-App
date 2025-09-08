@@ -9,7 +9,7 @@
  * - Setting up push notifications via Firebase.
  * * To Deploy:
  * 1. Update the API_URL constant with your Google Apps Script Web App URL.
- * 2. Update the firebaseConfig object with your Firebase project credentials.
+ * 2. Update the FIREBASE_CONFIG object with your Firebase project credentials.
  * 3. Update the VAPID_KEY constant with your FCM VAPID key for push notifications.
  */
 
@@ -23,23 +23,27 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyKI1f8msDh3jNnvVj4DSxt
 
 /**
  * @desc Firebase configuration object for push notifications.
+ * * ACTION REQUIRED: Replace this with the actual config object from your Firebase project.
+ * * You can find this in your Firebase Console: Project settings > General > Your apps > Web app.
  * @type {object}
  */
 const FIREBASE_CONFIG = {
-    // This is a placeholder configuration. Replace with your actual Firebase project config.
-    apiKey: "AIzaSyDy3k1AoEKeuCKjmFxefn9fapeqv2Le1_w",
+    apiKey: "AIzaSyBV_2JwCLtow5F6C7463NmfP2py5W-fj5I",
     authDomain: "hsaban94-cc777.firebaseapp.com",
     projectId: "hsaban94-cc777",
-    storageBucket: "hsaban94-cc777.firebasestorage.app",
+    storageBucket: "hsaban94-cc777.appspot.com",
     messagingSenderId: "299206369469",
-    appId: "1:299206369469:web:50ca90c58f1981ec9457d4"
+    // IMPORTANT: You need to get the `appId` from your Firebase project settings for your specific web app.
+    appId: "1:299206369469:web:YOUR_UNIQUE_APP_ID" 
 };
 
 /**
  * @desc VAPID key for Firebase Cloud Messaging (FCM) push notifications.
+ * * ACTION REQUIRED: Generate a new key pair in your Firebase Console and paste it here.
+ * * Find it here: Project settings > Cloud Messaging > Web configuration > Generate key pair.
  * @type {string}
  */
-const VAPID_KEY = 'BJ-N63_NAGZ3g3A9yLzGfLw9a1Jt_N2d_gMv8KjZ3xH-e6wQ3kF1oXyP_s5hW8v-Z4yY9_xX7zR6cE7w_I9jJ8'; 
+const VAPID_KEY = 'YOUR_VAPID_KEY_HERE'; 
 
 // ===== 2. DOM ELEMENT SELECTORS =====
 const dom = {
@@ -74,9 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initialize Firebase and then load client data
-    // It's commented out to prevent errors if Firebase SDK is not included.
-    // Uncomment when you add the Firebase SDK scripts to index.html
-    /*
     try {
         if (typeof firebase !== 'undefined' && !firebase.apps.length) {
             firebase.initializeApp(FIREBASE_CONFIG);
@@ -85,9 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } catch (error) {
         console.error("Firebase initialization failed:", error);
+        console.warn("Please ensure you have included the Firebase SDKs in your index.html and that your FIREBASE_CONFIG object is correct.");
     }
-    */
-
+    
     loadClientData(clientId);
     initEventListeners();
 });
@@ -232,7 +233,6 @@ function handleAction(actionType) {
 }
 
 // ===== 7. PUSH NOTIFICATIONS (FIREBASE) =====
-// NOTE: This section requires Firebase SDKs to be included in index.html
 
 /**
  * @desc Sets up the notification prompt and token retrieval logic.
@@ -293,16 +293,24 @@ async function retrieveToken(messaging, clientId) {
 }
 
 /**
- * @desc Placeholder function to send the FCM token to your backend server.
+ * @desc Sends the FCM token to your backend server via a POST request.
  * @param {string} clientId - The client's ID.
  * @param {string} token - The FCM token.
  */
 function sendTokenToServer(clientId, token) {
     console.log(`Sending token to server for client ${clientId}`);
-    // Example:
-    // fetch('YOUR_SERVER_ENDPOINT/save-token', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ clientId, token })
-    // });
+    fetch(API_URL, {
+        method: 'POST',
+        // Google Apps Script doPost requires a string payload and a specific content type
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+            action: 'saveToken',
+            clientId: clientId,
+            token: token
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log('Server response to token save:', data))
+    .catch(err => console.error('Error sending token to server:', err));
 }
+
