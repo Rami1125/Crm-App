@@ -1,57 +1,31 @@
 /**
- * app.js
- * * This file contains the core logic for the Client CRM PWA.
- * It handles:
- * - Configuration and API endpoints.
- * - Fetching data from the server (Google Apps Script).
- * - Updating the UI based on the fetched data.
- * - Handling user interactions (button clicks).
- * - Setting up push notifications via Firebase.
- * * To Deploy:
- * 1. Update the API_URL constant with your Google Apps Script Web App URL.
- * 2. Update the FIREBASE_CONFIG object with your Firebase project credentials.
- * 3. Update the VAPID_KEY constant with your FCM VAPID key for push notifications.
+ * @file app.js
+ * @description Main client-side logic for the Container Management CRM PWA.
+ * Handles data fetching, UI updates, event listeners, and notifications.
  */
 
-// ===== 1. CONFIGURATION =====
+// --- 1. CONFIGURATION & SETUP ---
+// Instructions: Replace this URL with your own Google Apps Script deployment URL.
+const API_URL = 'https://script.google.com/macros/s/AKfycbzG1HpfdwKdhPquxx-bcgkd_eotcMRSk8D8zb54sm7rYcYiD_-gtOzbo2ytqQ-6f_x42A/exec';
 
-/**
- * @desc The URL of the Google Apps Script web app that serves the client data.
- * @type {string}
- */
-const API_URL = 'https://script.google.com/macros/s/AKfycbzvd34ZpiA3bhi0b_AmyTSoFCTp2D_AYGcKBrNFojaQLvjNmhX9iPzH3GcmiTnuicKMOg/exec';
-
-/**
- * @desc Firebase configuration object for push notifications.
- * * ACTION REQUIRED: Replace this with the actual config object from your Firebase project.
- * * You can find this in your Firebase Console: Project settings > General > Your apps > Web app.
- * @type {object}
- */
+// Instructions: Replace this with your actual Firebase project configuration.
+// This is required for Push Notifications to work.
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBV_2JwCLtow5F6C7463NmfP2py5W-fj5I",
     authDomain: "hsaban94-cc777.firebaseapp.com",
     projectId: "hsaban94-cc777",
     storageBucket: "hsaban94-cc777.appspot.com",
     messagingSenderId: "299206369469",
-    // IMPORTANT: You need to get the `appId` from your Firebase project settings for your specific web app.
-    appId: "1:299206369469:web:YOUR_UNIQUE_APP_ID" 
+    appId: "1:299206369469:web:50ca90c58f1981ec9457d4" // Replace with your web app's ID
 };
 
-/**
- * @desc VAPID key for Firebase Cloud Messaging (FCM) push notifications.
- * * ACTION REQUIRED: Generate a new key pair in your Firebase Console and paste it here.
- * * Find it here: Project settings > Cloud Messaging > Web configuration > Generate key pair.
- * @type {string}
- */
-const VAPID_KEY = 'YOUR_VAPID_KEY_HERE'; 
-
-// ===== 2. DOM ELEMENT SELECTORS =====
+// --- 2. DOM ELEMENT SELECTORS ---
 const dom = {
     loader: document.getElementById('loader'),
     appContent: document.getElementById('app-content'),
     clientName: document.getElementById('client-name'),
-    noActiveOrder: document.getElementById('no-active-order'),
     activeOrderSection: document.getElementById('active-order-section'),
+    noActiveOrder: document.getElementById('no-active-order'),
     statusBadge: document.getElementById('status-badge'),
     orderAddress: document.getElementById('order-address'),
     orderId: document.getElementById('order-id'),
@@ -66,245 +40,257 @@ const dom = {
     cancelNotificationsBtn: document.getElementById('cancel-notifications'),
 };
 
-// ===== 3. APPLICATION INITIALIZATION =====
-
+// --- 3. APPLICATION INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM loaded. Initializing app...");
+    console.log('DOM loaded. Initializing app...');
     const params = new URLSearchParams(window.location.search);
     const clientId = params.get('id');
 
     if (!clientId) {
-        showError('שגיאה: לא זוהה מספר לקוח. יש לוודא שהכתובת כוללת `?id=NUMBER`');
+        showError('שגיאה: לא זוהה מספר לקוח בכתובת ה-URL.');
         return;
     }
-    
     console.log(`Client ID found: ${clientId}`);
 
-    // Initialize Firebase
-    try {
-        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-            firebase.initializeApp(FIREBASE_CONFIG);
-            const messaging = firebase.messaging();
-            setupNotifications(messaging, clientId);
-        }
-    } catch (error) {
-        console.error("Firebase initialization failed:", error);
-        console.warn("Please ensure you have included the Firebase SDKs in your index.html and that your FIREBASE_CONFIG object is correct.");
-    }
-    
+    initializeFirebase(clientId);
     loadClientData(clientId);
-    initEventListeners();
 });
 
-// ===== 4. API & DATA HANDLING =====
+// --- 4. CORE LOGIC ---
 
 /**
- * @desc Fetches client data from the API and triggers the UI update.
- * @param {string} clientId - The ID of the client to fetch data for.
+ * Fetches client data from the Google Apps Script API.
+ * @param {string} clientId The ID of the client to fetch data for.
  */
 async function loadClientData(clientId) {
-    console.log(`Attempting to fetch data for client ID: ${clientId} from ${API_URL}`);
+    showLoader(true, 'טוען את נתוני המכולה שלך...');
     try {
+        console.log(`Attempting to fetch data for client ID: ${clientId} from ${API_URL}`);
         const response = await fetch(`${API_URL}?id=${clientId}`);
-        console.log("Fetch response received:", response);
+        console.log('Fetch response received:', response);
 
         if (!response.ok) {
-            throw new Error(`שגיאת רשת (HTTP Status): ${response.status}`);
+            throw new Error(`שגיאת רשת: השרת החזיר סטטוס ${response.status}`);
         }
         
-        // DEBUG: Log the raw text to see exactly what the server sent
+        // --- Enhanced Debugging ---
+        // First, get the raw text to see exactly what the server sent.
         const rawText = await response.text();
         console.log("Raw response text from server:", rawText);
 
-        // Attempt to parse the text as JSON
-        let data;
-        try {
-            data = JSON.parse(rawText);
-        } catch (jsonError) {
-            console.error("Error parsing JSON:", jsonError);
-            throw new Error("השרת החזיר תשובה שאינה בפורמט JSON תקין.");
-        }
-        
+        // Then, try to parse it as JSON.
+        const data = JSON.parse(rawText);
         console.log("Parsed data object:", data);
 
+
         if (data.error) {
-            throw new Error(`שגיאה מה-API: ${data.error}`);
+            throw new Error(`שגיאה מהשרת: ${data.error}`);
         }
 
         updateUI(data);
-
-        dom.loader.classList.add('hidden');
-        dom.appContent.classList.remove('hidden');
-        console.log("UI updated successfully.");
+        console.log('UI updated successfully.');
 
     } catch (error) {
-        console.error('CRITICAL ERROR during data loading:', error);
-        let friendlyMessage = `אופס, משהו השתבש בטעינת הנתונים. (${error.message})`;
-        if (error.message.includes('Failed to fetch')) {
-             friendlyMessage = "שגיאת רשת. ודא שיש חיבור לאינטרנט ושכתובת ה-API נכונה.";
-        }
-        showError(friendlyMessage);
+        console.error('Error in loadClientData:', error);
+        showError(`אופס, משהו השתבש בטעינת הנתונים. ${error.message}`);
+    } finally {
+        showLoader(false);
     }
 }
 
 /**
- * @desc Displays an error message in the UI, hiding the loader.
- * @param {string} message - The error message to display.
- */
-function showError(message) {
-    dom.loader.classList.remove('hidden'); // Make sure loader area is visible
-    dom.appContent.classList.add('hidden');
-    dom.loader.innerHTML = `<div class="card" style="border-color: var(--danger-color);"><h2 style="color: var(--danger-color);">שגיאה</h2><p>${message}</p><p>אנא בדוק את הקונסול (F12) לפרטים נוספים.</p></div>`;
-}
-
-// ===== 5. UI UPDATES =====
-
-/**
- * @desc Populates the UI with data received from the API.
- * @param {object} data - The client data object.
+ * Updates the User Interface with the data received from the API.
+ * @param {object} data The structured data object for the client.
  */
 function updateUI(data) {
     const { clientInfo, activeOrder, orderHistory } = data;
 
-    if (!clientInfo || !orderHistory) {
-        console.error("Data object is missing required keys (clientInfo, orderHistory). Received:", data);
-        showError("מבנה הנתונים שהתקבל מהשרת אינו תקין.");
-        return;
-    }
-
+    // --- Client Info ---
     dom.clientName.textContent = clientInfo.name ? `שלום, ${clientInfo.name}` : 'לקוח יקר';
 
-    if (activeOrder && Object.keys(activeOrder).length > 0) {
-        dom.activeOrderSection.classList.remove('hidden');
-        dom.noActiveOrder.classList.add('hidden');
+    // --- Active Order Section ---
+    if (activeOrder && activeOrder.orderId) {
+        dom.activeOrderSection.style.display = 'block';
+        dom.noActiveOrder.style.display = 'none';
 
         dom.statusBadge.textContent = activeOrder.status || 'לא ידוע';
-        dom.statusBadge.className = `tag ${getStatusClass(activeOrder.status)}`;
-        dom.orderAddress.textContent = activeOrder.address || 'לא צוינה כתובת';
-        dom.orderId.textContent = activeOrder.orderId || '-';
-        dom.daysOnSite.textContent = activeOrder.daysOnSite || '0';
-        dom.endDate.textContent = activeOrder.endDate || '-';
-        dom.lastAction.textContent = activeOrder.lastAction || '-';
+        dom.statusBadge.className = `status-badge ${getBadgeClass(activeOrder.status)}`;
+        dom.orderAddress.textContent = activeOrder.address || 'לא צוינה';
+        dom.orderId.textContent = activeOrder.orderId;
+        dom.daysOnSite.textContent = activeOrder.daysOnSite;
+        dom.endDate.textContent = activeOrder.endDate;
+        dom.lastAction.textContent = activeOrder.lastAction;
     } else {
-        dom.activeOrderSection.classList.add('hidden');
-        dom.noActiveOrder.classList.remove('hidden');
+        dom.activeOrderSection.style.display = 'none';
+        dom.noActiveOrder.style.display = 'block';
     }
 
-    renderOrderHistory(orderHistory);
-}
-
-/**
- * @desc Renders the list of historical orders.
- * @param {Array<object>} history - An array of order history objects.
- */
-function renderOrderHistory(history) {
+    // --- Order History ---
     dom.historyList.innerHTML = '';
-    if (history && history.length > 0) {
-        history.forEach(order => {
+    if (orderHistory && orderHistory.length > 0) {
+        const historyFragment = document.createDocumentFragment();
+        orderHistory.forEach(order => {
             const item = document.createElement('div');
-            item.className = 'order-item';
-            
-            const statusClass = getStatusClass(order.status);
-
+            item.className = 'history-item';
             item.innerHTML = `
-                <div class="details">
-                    <strong>${order.action || 'פעולה לא ידועה'}</strong>
-                    <div class="date">תעודה: ${order.orderId || '-'} | תאריך: ${order.date || '-'}</div>
+                <div class="icon-wrapper">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
                 </div>
-                <span class="tag ${statusClass}">${order.status || 'לא ידוע'}</span>
+                <div class="details">
+                    <div class="title"><strong>${order.action || 'פעולה'}</strong> - תעודה: ${order.orderId}</div>
+                    <div class="meta">
+                        <span>${order.date}</span>
+                        <span class="separator">•</span>
+                        <span>${order.address}</span>
+                    </div>
+                </div>
+                <div class="status-tag-wrapper">
+                    <span class="status-tag ${getBadgeClass(order.status)}">${order.status}</span>
+                </div>
             `;
-            dom.historyList.appendChild(item);
+            historyFragment.appendChild(item);
         });
+        dom.historyList.appendChild(historyFragment);
     } else {
-        dom.historyList.innerHTML = '<p>לא נמצאה היסטוריית הזמנות.</p>';
+        dom.historyList.innerHTML = '<div class="empty-state">לא נמצאה היסטוריית הזמנות.</div>';
     }
 }
 
-/**
- * @desc Determines the CSS class for a status tag based on its text.
- * @param {string} statusText - The status text (e.g., "פתוח", "סגור").
- * @returns {string} The corresponding CSS class ('open', 'closed', 'alert').
- */
-function getStatusClass(statusText = '') {
-    const status = statusText.toLowerCase();
-    if (status === 'פתוח') return 'open';
-    if (status === 'סגור') return 'closed';
-    // Add more statuses if needed
-    return 'alert'; 
-}
+
+// --- 5. EVENT LISTENERS ---
+dom.requestSwapBtn.addEventListener('click', () => handleAction('swap'));
+dom.requestRemovalBtn.addEventListener('click', () => handleAction('removal'));
+dom.confirmNotificationsBtn.addEventListener('click', requestNotificationPermission);
+dom.cancelNotificationsBtn.addEventListener('click', () => {
+    dom.notificationPrompt.classList.remove('show');
+});
 
 
-// ===== 6. EVENT LISTENERS =====
+// --- 6. HELPER FUNCTIONS ---
 
 /**
- * @desc Initializes all event listeners for the application.
- */
-function initEventListeners() {
-    dom.requestSwapBtn.addEventListener('click', () => handleAction('swap'));
-    dom.requestRemovalBtn.addEventListener('click', () => handleAction('removal'));
-}
-
-/**
- * @desc Handles the logic for requesting a swap or removal.
- * @param {'swap' | 'removal'} actionType - The type of action requested.
+ * Handles user actions like requesting a swap or removal.
+ * @param {string} actionType - 'swap' or 'removal'.
  */
 function handleAction(actionType) {
     const actionText = actionType === 'swap' ? 'החלפה' : 'פינוי';
-    // Replace the native confirm/alert with a custom modal/toast in a real app
-    if (!confirm(`האם אתה בטוח שברצונך לבקש ${actionText}?`)) return;
-    
+    // Replace the simple alerts with a more modern modal/toast in a real app
     alert(`בקשת ${actionText} נשלחה למערכת. ניצור איתך קשר בהקדם לאישור.`);
-    // In a real app, this would trigger an API call:
-    // sendActionRequest(clientId, actionType);
 }
 
-// ===== 7. PUSH NOTIFICATIONS (FIREBASE) =====
+/**
+ * Shows or hides the main loader.
+ * @param {boolean} visible - Should the loader be visible?
+ * @param {string} [text] - Optional text to display in the loader.
+ */
+function showLoader(visible, text = '') {
+    if (visible) {
+        dom.loader.textContent = text;
+        dom.loader.style.display = 'block';
+        dom.appContent.style.display = 'none';
+    } else {
+        dom.loader.style.display = 'none';
+        dom.appContent.style.display = 'block';
+    }
+}
 
 /**
- * @desc Sets up the notification prompt and token retrieval logic.
- * @param {firebase.messaging.Messaging} messaging - The Firebase messaging instance.
+ * Displays an error message to the user.
+ * @param {string} message - The error message to display.
+ */
+function showError(message) {
+    dom.loader.innerHTML = `<div class="error-state">${message}</div>`;
+    showLoader(true);
+}
+
+/**
+ * Returns a CSS class for a status badge based on the status text.
+ * @param {string} status - The status text (e.g., "פתוח", "סגור").
+ * @returns {string} The corresponding CSS class.
+ */
+function getBadgeClass(status = "") {
+    const s = String(status).toLowerCase();
+    if (s.includes('פתוח')) return 'open';
+    if (s.includes('סגור')) return 'closed';
+    return 'default';
+}
+
+// --- 7. PUSH NOTIFICATIONS LOGIC ---
+
+/**
+ * Initializes the Firebase app and sets up messaging.
+ * @param {string} clientId - The current client's ID.
+ */
+function initializeFirebase(clientId) {
+    try {
+        // Check if Firebase is available and hasn't been initialized yet
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(FIREBASE_CONFIG);
+            const messaging = firebase.messaging();
+            setupNotifications(messaging, clientId);
+        } else {
+             console.warn("Firebase SDK not found or already initialized.");
+        }
+    } catch (error) {
+        console.error("Firebase initialization failed:", error);
+    }
+}
+
+/**
+ * Manages the logic for showing the notification prompt and handling user's choice.
+ * @param {object} messaging - The Firebase Messaging instance.
  * @param {string} clientId - The current client's ID.
  */
 function setupNotifications(messaging, clientId) {
+    // Don't show the prompt if permission is already granted or denied
     if (Notification.permission === 'granted') {
         retrieveToken(messaging, clientId);
         return;
     }
     if (Notification.permission === 'denied') {
-        console.log("Notification permission was denied.");
+        console.log('Notification permission has been denied by the user.');
         return;
     }
-
+    // Show the custom prompt after a short delay
     setTimeout(() => {
-        dom.notificationPrompt.classList.remove('hidden');
+        dom.notificationPrompt.classList.add('show');
     }, 3000);
-
-    dom.confirmNotificationsBtn.addEventListener('click', async () => {
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                await retrieveToken(messaging, clientId);
-            }
-        } catch (error) {
-            console.error('Error requesting notification permission', error);
-        } finally {
-            dom.notificationPrompt.classList.add('hidden');
-        }
-    });
-
-    dom.cancelNotificationsBtn.addEventListener('click', () => {
-        dom.notificationPrompt.classList.add('hidden');
-    });
 }
 
 /**
- * @desc Retrieves the FCM token and sends it to the server.
- * @param {firebase.messaging.Messaging} messaging - The Firebase messaging instance.
+ * Requests browser permission for notifications.
+ */
+async function requestNotificationPermission() {
+    dom.notificationPrompt.classList.remove('show');
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            console.log('Notification permission granted.');
+            // Re-initialize messaging and get token now that we have permission
+            const clientId = new URLSearchParams(window.location.search).get('id');
+            initializeFirebase(clientId);
+        } else {
+            console.log('Unable to get permission to notify.');
+        }
+    } catch (error) {
+        console.error('Error requesting notification permission', error);
+    }
+}
+
+
+/**
+ * Retrieves the FCM token and sends it to the server.
+ * @param {object} messaging - The Firebase Messaging instance.
  * @param {string} clientId - The current client's ID.
  */
 async function retrieveToken(messaging, clientId) {
-     try {
-        const currentToken = await messaging.getToken({ vapidKey: VAPID_KEY });
+    try {
+        // ⭐️⭐️⭐️ ACTION REQUIRED ⭐️⭐️⭐️
+        // Replace "YOUR_VAPID_PUBLIC_KEY" with your key from Firebase Console
+        // Project Settings > Cloud Messaging > Web configuration > "Web Push certificates"
+        const vapidKey = 'YOUR_VAPID_PUBLIC_KEY'; 
+        const currentToken = await messaging.getToken({ vapidKey: vapidKey });
+
         if (currentToken) {
             console.log('FCM Token:', currentToken);
             sendTokenToServer(clientId, currentToken);
@@ -317,23 +303,37 @@ async function retrieveToken(messaging, clientId) {
 }
 
 /**
- * @desc Sends the FCM token to your backend server via a POST request.
+ * Sends the FCM token to the server to be stored.
  * @param {string} clientId - The client's ID.
  * @param {string} token - The FCM token.
  */
-function sendTokenToServer(clientId, token) {
-    console.log(`Sending token to server for client ${clientId}`);
-    fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({
-            action: 'saveToken',
-            clientId: clientId,
-            token: token
-        })
-    })
-    .then(res => res.json())
-    .then(data => console.log('Server response to token save:', data))
-    .catch(err => console.error('Error sending token to server:', err));
+async function sendTokenToServer(clientId, token) {
+    console.log(`Sending token to server for client ${clientId}...`);
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            // Use 'text/plain' to avoid CORS preflight issues with simple Apps Script deployments
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'saveFCMToken',
+                clientId: clientId,
+                token: token
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (result.status === 'success') {
+            console.log('Token successfully saved on the server.');
+        } else {
+            throw new Error(`Server returned an error: ${result.message}`);
+        }
+
+    } catch (error) {
+        console.error('Failed to send token to server:', error);
+    }
 }
 
