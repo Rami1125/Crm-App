@@ -84,7 +84,6 @@ async function loadClientData(clientId) {
         }
 
         updateUI(data);
-        console.log('UI updated successfully.');
 
     } catch (error) {
         console.error('CRITICAL ERROR during data loading:', error);
@@ -96,61 +95,91 @@ async function loadClientData(clientId) {
 
 /**
  * Updates the User Interface with the data received from the API.
- * This version includes robust checks to prevent errors if data is missing.
+ * This version includes granular try-catch blocks for better error detection.
  * @param {object} data The structured data object for the client.
  */
 function updateUI(data) {
-    const clientInfo = data.clientInfo || { name: 'לקוח יקר' };
-    const activeOrder = data.activeOrder;
-    const orderHistory = data.orderHistory || [];
+    try {
+        console.log("Starting UI update...");
+        const clientInfo = data.clientInfo || { name: 'לקוח יקר' };
+        const activeOrder = data.activeOrder;
+        const orderHistory = data.orderHistory || [];
 
-    dom.clientName.textContent = `שלום, ${clientInfo.name}`;
+        // --- Client Info ---
+        dom.clientName.textContent = `שלום, ${clientInfo.name}`;
+        console.log("Client name updated.");
 
-    if (activeOrder && activeOrder.orderId) {
-        dom.activeOrderSection.style.display = 'block';
-        dom.noActiveOrder.style.display = 'none';
+        // --- Active Order Section ---
+        try {
+            if (activeOrder && activeOrder.orderId) {
+                console.log("Active order found. Populating details...");
+                dom.activeOrderSection.style.display = 'block';
+                dom.noActiveOrder.style.display = 'none';
 
-        dom.statusBadge.textContent = activeOrder.status || 'לא ידוע';
-        dom.statusBadge.className = `status-badge ${getBadgeClass(activeOrder.status)}`;
-        dom.orderAddress.textContent = activeOrder.address || 'לא צוינה';
-        dom.orderId.textContent = activeOrder.orderId || 'N/A';
-        dom.daysOnSite.textContent = activeOrder.daysOnSite || '0';
-        dom.endDate.textContent = activeOrder.endDate || 'N/A';
-        dom.lastAction.textContent = activeOrder.lastAction || 'N/A';
-    } else {
-        dom.activeOrderSection.style.display = 'none';
-        dom.noActiveOrder.style.display = 'block';
-    }
+                dom.statusBadge.textContent = activeOrder.status || 'לא ידוע';
+                dom.statusBadge.className = `status-badge ${getBadgeClass(activeOrder.status)}`;
+                dom.orderAddress.textContent = activeOrder.address || 'לא צוינה';
+                dom.orderId.textContent = activeOrder.orderId || 'N/A';
+                dom.daysOnSite.textContent = activeOrder.daysOnSite || '0';
+                dom.endDate.textContent = activeOrder.endDate || 'N/A';
+                dom.lastAction.textContent = activeOrder.lastAction || 'N/A';
+                console.log("Active order section populated.");
+            } else {
+                console.log("No active order found. Displaying 'no order' message.");
+                dom.activeOrderSection.style.display = 'none';
+                dom.noActiveOrder.style.display = 'block';
+            }
+        } catch (e) {
+            console.error("Error updating ACTIVE ORDER section:", e);
+        }
 
-    dom.historyList.innerHTML = '';
-    if (orderHistory.length > 0) {
-        const historyFragment = document.createDocumentFragment();
-        orderHistory.forEach(order => {
-            const item = document.createElement('div');
-            item.className = 'history-item';
-            item.innerHTML = `
-                <div class="icon-wrapper">
-                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-                </div>
-                <div class="details">
-                    <div class="title"><strong>${order.action || 'פעולה'}</strong> - תעודה: ${order.orderId || 'N/A'}</div>
-                    <div class="meta">
-                        <span>${order.date || 'אין תאריך'}</span>
-                        <span class="separator">•</span>
-                        <span>${order.address || 'אין כתובת'}</span>
-                    </div>
-                </div>
-                <div class="status-tag-wrapper">
-                    <span class="status-tag ${getBadgeClass(order.status)}">${order.status || 'לא ידוע'}</span>
-                </div>
-            `;
-            historyFragment.appendChild(item);
-        });
-        dom.historyList.appendChild(historyFragment);
-    } else {
-        dom.historyList.innerHTML = '<div class="empty-state">לא נמצאה היסטוריית הזמנות.</div>';
+
+        // --- Order History ---
+        try {
+            dom.historyList.innerHTML = '';
+            if (orderHistory.length > 0) {
+                console.log(`Found ${orderHistory.length} items for history. Populating list...`);
+                const historyFragment = document.createDocumentFragment();
+                orderHistory.forEach(order => {
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.innerHTML = `
+                        <div class="icon-wrapper">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                        </div>
+                        <div class="details">
+                            <div class="title"><strong>${order.action || 'פעולה'}</strong> - תעודה: ${order.orderId || 'N/A'}</div>
+                            <div class="meta">
+                                <span>${order.date || 'אין תאריך'}</span>
+                                <span class="separator">•</span>
+                                <span>${order.address || 'אין כתובת'}</span>
+                            </div>
+                        </div>
+                        <div class="status-tag-wrapper">
+                            <span class="status-tag ${getBadgeClass(order.status)}">${order.status || 'לא ידוע'}</span>
+                        </div>
+                    `;
+                    historyFragment.appendChild(item);
+                });
+                dom.historyList.appendChild(historyFragment);
+                console.log("History section populated.");
+            } else {
+                console.log("No history items found. Displaying empty state.");
+                dom.historyList.innerHTML = '<div class="empty-state">לא נמצאה היסטוריית הזמנות.</div>';
+            }
+        } catch (e) {
+            console.error("Error updating HISTORY section:", e);
+        }
+        
+        console.log('UI updated successfully.');
+
+    } catch (error) {
+        console.error("A critical error occurred within the main updateUI function:", error);
+        // This is a fallback in case the whole function fails
+        showError('שגיאה קריטית בעדכון הממשק.');
     }
 }
+
 
 // --- 5. EVENT LISTENERS ---
 dom.requestSwapBtn.addEventListener('click', () => handleAction('swap'));
