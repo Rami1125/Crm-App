@@ -1,47 +1,67 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ניהול מכולה - ח. סבן</title>
     
-    <meta name="theme-color" content="#0d6efd">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://placehold.co/192x192/0d6efd/FFFFFF?text=סבן">
+    <!-- Meta tags for a native-like mobile experience -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f9fa">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1c1c1e">
 
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+    <!-- New Icon -->
+    <link rel="icon" href="https://img.icons8.com/?size=100&id=9fZ3EWahbXyH&format=png&color=000000">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/?size=100&id=9fZ3EWahbXyH&format=png&color=000000">
+
+    <!-- Manifest for PWA capabilities -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
     
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
 </head>
 <body>
+    
     <div class="app-container">
+        <!-- Header Section -->
         <header class="app-header">
-            <div class="logo">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-            </div>
-            <div class="header-text">
+            <div class="logo-title">
+                <img src="https://img.icons8.com/?size=100&id=9fZ3EWahbXyH&format=png&color=000000" alt="לוגו המערכת" class="logo">
                 <h1>ח. סבן חומרי בנין</h1>
-                <p id="client-name">טוען נתונים...</p>
             </div>
+            <p id="client-name" class="client-greeting">טוען נתונים...</p>
         </header>
 
-        <main id="app-content" style="display: none;">
-            <div id="no-active-order" class="card empty-state-card" style="display:none;">
-                <h2>אין הזמנה פעילה כרגע</h2>
+        <!-- Main Content Area -->
+        <main id="app-content" style="visibility: hidden;">
+            
+            <!-- Message for when there is no active order -->
+            <div id="no-active-order" class="card" style="display:none;">
+                <h2>אין הזמנה פעילה</h2>
                 <p>נראה שאין לך מכולה פעילה בשטח. תוכל לצפות בהיסטוריית ההזמנות שלך למטה.</p>
             </div>
 
+            <!-- Active Order Details -->
             <div id="active-order-section">
                 <div class="card status-card">
                     <div class="card-header">
                         <h2>הזמנה פעילה</h2>
                         <span id="status-badge" class="status-badge"></span>
                     </div>
-                    <p class="address-line"><strong>כתובת:</strong> <span id="order-address"></span></p>
+                    <p class="address-line">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <span id="order-address"></span>
+                    </p>
                     <div class="info-grid">
                         <div class="info-item">
                             <div class="label">מס' הזמנה</div>
@@ -60,44 +80,72 @@
                             <div class="value" id="last-action"></div>
                         </div>
                     </div>
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <div class="progress-bar-wrapper">
+                            <div id="order-progress-bar" class="progress-bar"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span id="progress-start-date"></span>
+                            <span id="progress-end-date"></span>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- Quick Actions -->
                 <div class="card actions-card">
                     <h2>פעולות מהירות</h2>
                     <div class="action-buttons">
-                        <button id="request-swap-btn" class="action-btn">בקש החלפה</button>
-                        <button id="request-removal-btn" class="action-btn secondary">בקש פינוי</button>
+                        <button id="request-swap-btn" class="action-btn">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"/></svg>
+                            בקש החלפה
+                        </button>
+                        <button id="request-removal-btn" class="action-btn secondary">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                            בקש פינוי
+                        </button>
                     </div>
                 </div>
             </div>
 
+            <!-- Order History -->
             <div class="card history-card">
-                <h2>היסטוריית הזמנות</h2>
+                 <div class="card-header">
+                    <h2>היסטוריית הזמנות</h2>
+                </div>
                 <div id="history-list">
-                    <div class="empty-state">טוען היסטוריה...</div>
+                    <!-- History items will be injected here by app.js -->
                 </div>
             </div>
         </main>
 
-        <div id="loader">טוען את נתוני המכולה שלך...</div>
-    </div>
-    
-    <div id="notification-prompt" class="notification-prompt">
-        <p>רוצה לקבל עדכונים חיים על המכולה שלך?</p>
-        <div>
-            <button id="confirm-notifications" class="btn small success">כן, בטח!</button>
-            <button id="cancel-notifications" class="btn small">לא תודה</button>
+        <!-- Loader displayed during initial data fetch -->
+        <div id="loader" class="loader-container">
+            <div class="spinner"></div>
+            <p>טוען את נתוני המכולה שלך...</p>
         </div>
     </div>
+    
+    <!-- Notification Permission Modal -->
+    <div id="notification-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <h2>עדכונים חיים</h2>
+            <p>רוצה לקבל התראות ועדכונים על המכולה שלך ישירות לנייד?</p>
+            <div class="modal-actions">
+                <button id="cancel-notifications" class="modal-btn secondary">אולי בפעם הבאה</button>
+                <button id="confirm-notifications" class="modal-btn primary">כן, בטח!</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification placeholder -->
+    <div id="toast-container"></div>
 
-    <!-- ⭐️⭐️⭐️ NEW: DEBUG BUTTON ⭐️⭐️⭐️ -->
-    <button id="debug-button" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #dc3545; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;">🐞</button>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
-    <!-- Main App Logic -->
-    <script src="app.js"></script>
+    <!-- Main application script -->
+    <script src="app.js" defer></script>
 </body>
 </html>
 
