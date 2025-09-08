@@ -1,0 +1,295 @@
+/* * styles.css
+ * This file contains all the styling for the CRM application.
+ * It uses CSS variables for easy theming and is built with a mobile-first approach.
+*/
+
+/* ===== Theme & Design Tokens ===== */
+:root {
+    /* Colors */
+    --primary-color: #0d6efd; /* Premium Blue */
+    --primary-hover: #0b5ed7;
+    --secondary-color: #ff9f1c; /* Accent Orange */
+    --secondary-hover: #e68f19;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --background-color: #f8f9fa; /* Light Gray */
+    --card-background: #ffffff;
+    --text-primary: #212529;
+    --text-secondary: #6c757d; /* Muted Text */
+    --border-color: #dee2e6;
+
+    /* Typography */
+    --font-family-base: 'Assistant', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-size-base: 1rem; /* 16px */
+    --font-weight-normal: 400;
+    --font-weight-bold: 700;
+    
+    /* Spacing & Sizing */
+    --spacing-unit: 8px;
+    --spacing-xs: calc(var(--spacing-unit) * 0.5);   /* 4px */
+    --spacing-sm: var(--spacing-unit);             /* 8px */
+    --spacing-md: calc(var(--spacing-unit) * 2);   /* 16px */
+    --spacing-lg: calc(var(--spacing-unit) * 3);   /* 24px */
+    --spacing-xl: calc(var(--spacing-unit) * 4);   /* 32px */
+
+    /* Borders & Shadows */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 16px;
+    --box-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --box-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Base & Reset Styles ===== */
+body {
+    font-family: var(--font-family-base);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    color: var(--text-primary);
+    overscroll-behavior-y: contain; /* Prevents pull-to-refresh on mobile */
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* ===== Layout ===== */
+.app-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ===== Components ===== */
+
+/* Header */
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-lg);
+}
+.app-header .logo {
+    color: var(--primary-color);
+}
+.app-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+}
+.app-header p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* Loader */
+.loader {
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+.loader .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto var(--spacing-md);
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Card */
+.card {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--box-shadow-md);
+    border: 1px solid var(--border-color);
+}
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+.card h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+/* Tag (Status Badge) */
+.tag {
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 999px; /* Pill shape */
+    font-size: 0.8rem;
+    font-weight: var(--font-weight-bold);
+    color: white;
+    text-transform: uppercase;
+}
+.tag.open { background-color: var(--success-color); }
+.tag.closed { background-color: var(--text-secondary); }
+.tag.alert { background-color: var(--danger-color); }
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+.info-item {
+    text-align: center;
+}
+.info-item .label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+    display: block;
+}
+.info-item .value {
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+}
+.address-line {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+.action-buttons.single {
+    grid-template-columns: 1fr;
+}
+.action-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+.action-btn:hover {
+    transform: translateY(-2px);
+    background-color: var(--primary-hover);
+    box-shadow: var(--box-shadow-md);
+}
+.action-btn:active {
+    transform: translateY(0);
+}
+.action-btn.secondary {
+    background-color: var(--secondary-color);
+}
+.action-btn.secondary:hover {
+    background-color: var(--secondary-hover);
+}
+.action-btn.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* History List */
+.history-card .order-item {
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+.history-card .order-item:last-child {
+    border-bottom: none;
+}
+.order-item .details strong {
+    font-size: 1rem;
+    display: block;
+}
+.order-item .details .date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Toast (Notification Prompt) */
+.toast {
+    position: fixed;
+    bottom: var(--spacing-md);
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    max-width: 570px; /* Aligns with app container max-width */
+    margin: 0 auto;
+    background-color: var(--text-primary);
+    color: white;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+    transform: translateY(200%);
+    transition: transform 0.4s ease-in-out;
+}
+.toast:not(.hidden) {
+    transform: translateY(0);
+}
+.toast p {
+    margin: 0;
+    padding-left: var(--spacing-md);
+}
+.toast-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+.btn-toast {
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+}
+.btn-toast.confirm {
+    background-color: var(--secondary-color);
+    color: white;
+}
+.btn-toast.cancel {
+    background-color: #555;
+    color: white;
+}
