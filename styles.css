@@ -122,8 +122,10 @@ thead th {
 }
 body {
     font-family: 'Arial', sans-serif;
-    background: #0b0b0b;
+    background: #ffffff;
     color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* צל קל */
+    border-radius: 12px;
     margin: 0;
     padding: 0;
 }
