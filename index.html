@@ -1,194 +1,52 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ניהול מכולה - ח. סבן</title>
-    
-    <meta name="theme-color" content="#ffffff">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/?size=192&id=9fZ3EWahbXyH&format=png&color=000000">
-
-    <link rel="icon" href="https://img.icons8.com/?size=100&id=9fZ3EWahbXyH&format=png&color=000000">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>יישום סלולרי – טבלת נתונים</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="bottom-bar" aria-hidden="false">
-  <button id="bar-action-1" class="bar-btn primary" title="פרטי הזמנה">הצג הזמנה</button>
-  <button id="bar-action-2" class="bar-btn secondary" title="הזמנה חדשה">הזמנה חדשה</button>
-</div>
 
-<!-- help floating hint (מופיע ל-5s) -->
-<button id="help-floating-btn" class="help-floating" aria-label="הדרכה מהירה">
-  ? הדרכה מהירה
-</button>
-<!-- tutorial overlay (hidden) -->
-<div id="tutorial-overlay" class="tutorial-overlay" style="display:none;">
-  <div class="tutorial-card">
-    <h3 style="margin:0 0 8px 0">הדרכה — איך להשתמש באפליקציה</h3>
-    <div class="tutorial-step">1. בדף הבית ראה את ההזמנה הפעילה והזמן הגעה.</div>
-    <div class="tutorial-step">2. השתמש בכפתורים התחתונים להזמנה/בקשת פינוי.</div>
-    <div class="tutorial-step">3. ברשימת ההיסטוריה: הקש על אייקון השכפול כדי לשכפל הזמנה קיימת.</div>
-    <div style="font-size:13px;color:#666;margin-top:8px">הדרכה מונפשת — הקש על סגור להמשיך</div>
-    <div class="tutorial-actions">
-      <button id="tutorial-close" class="bar-btn primary" style="width:140px">סגור</button>
-      <button id="tutorial-play" class="bar-btn secondary" style="width:120px">הפעל האנימציה</button>
-    </div>
+  <div class="app-frame">
+    <header class="app-header">
+      <h1>אפליקציית סלולרי</h1>
+    </header>
+
+    <main class="main-content">
+      <section class="data-card">
+        <h2>טבלת נתונים</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>פריט</th><th>סטטוס</th><th>זמן</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>הזמנה 001</td><td>פעילה</td><td>12:30</td></tr>
+              <tr><td>הזמנה 002</td><td>בוצעה</td><td>09:45</td></tr>
+              <tr><td>הזמנה 003</td><td>בדרך</td><td>14:10</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="info-cards">
+        <div class="info-card">מסגרת 1</div>
+        <div class="info-card">מסגרת 2</div>
+      </section>
+    </main>
   </div>
-</div>
-    <!-- Main App Container -->
-    <div class="app-container">
-        <!-- Loader Overlay -->
-        <div id="loader" class="loader-overlay">
-            <div class="spinner"></div>
-            <p>טוען נתונים...</p>
-        </div>
 
-        <header class="app-header">
-            <div class="logo-title">
-                <img src="https://img.icons8.com/?size=100&id=9fZ3EWahbXyH&format=png&color=000000" alt="לוגו ח. סבן" class="logo">
-                <h1>ח. סבן חומרי בנין</h1>
-            </div>
-            <p id="client-name"></p>
-        </header>
+  <!-- כפתור גלילה למעלה -->
+  <button id="scroll-top-btn" class="scroll-top-btn" title="חזרה למעלה">↑</button>
 
-        <!-- App content, hidden by default -->
-        <main id="app-content" style="visibility: hidden;">
-            
-            <div id="no-active-order" style="display:none;" class="card fade-in">
-                <h2>אין הזמנה פעילה כרגע</h2>
-                <p>נראה שאין לך מכולה פעילה בשטח. תוכל לצפות בהיסטוריית ההזמנות שלך למטה.</p>
-            </div>
-
-            <div id="active-order-section">
-                <!-- Current Order Status -->
-                <div class="card status-card">
-                    <div class="card-header">
-                        <h2>הזמנה פעילה</h2>
-                        <span id="status-badge" class="status-badge"></span>
-                    </div>
-                    <p class="address-line"><strong>כתובת:</strong> <span id="order-address"></span></p>
-                    
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="label">מס' הזמנה</div>
-                            <div class="value" id="order-id"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="label">ימים בשטח</div>
-                            <div class="value" id="days-on-site"></div>
-                        </div>
-                        <div class="info-item">
-                            <div class="label">פעולה אחרונה</div>
-                            <div class="value" id="last-action"></div>
-                        </div>
-                    </div>
-
-                    <div class="progress-container">
-                        <div class="progress-labels">
-                            <span id="progress-start-date"></span>
-                            <span id="progress-end-date"></span>
-                        </div>
-                        <div class="progress-track">
-                            <div id="order-progress-bar" class="progress-bar"></div>
-                        </div>
-                    </div>
-                </div>
-                    <!-- בתוך <main id="app-content"> אחרי היסטוריית ההזמנות -->
-<!-- bottom fixed action bar (מובייל) -->
-<div class="bottom-bar" aria-hidden="false">
-  <button id="bar-action-1" class="bar-btn primary" title="פרטי הזמנה">הצג הזמנה</button>
-  <button id="bar-action-2" class="bar-btn secondary" title="הזמנה חדשה">הזמנה חדשה</button>
-</div>
-
-<!-- help floating hint (מופיע ל-5s) -->
-<button id="help-floating-btn" class="help-floating" aria-label="הדרכה מהירה">
-  ? הדרכה מהירה
-</button>
-
-<!-- tutorial overlay (hidden) -->
-<div id="tutorial-overlay" class="tutorial-overlay" style="display:none;">
-  <div class="tutorial-card">
-    <h3 style="margin:0 0 8px 0">הדרכה — איך להשתמש באפליקציה</h3>
-    <div class="tutorial-step">1. בדף הבית ראה את ההזמנה הפעילה והזמן הגעה.</div>
-    <div class="tutorial-step">2. השתמש בכפתורים התחתונים להזמנה/בקשת פינוי.</div>
-    <div class="tutorial-step">3. ברשימת ההיסטוריה: הקש על אייקון השכפול כדי לשכפל הזמנה קיימת.</div>
-    <div style="font-size:13px;color:#666;margin-top:8px">הדרכה מונפשת — הקש על סגור להמשיך</div>
-    <div class="tutorial-actions">
-      <button id="tutorial-close" class="bar-btn primary" style="width:140px">סגור</button>
-      <button id="tutorial-play" class="bar-btn secondary" style="width:120px">הפעל האנימציה</button>
-    </div>
-  </div>
-</div>
-
-                <!-- Main Actions -->
-                <div class="card actions-card">
-                    <h2>פעולות מהירות</h2>
-                    <div class="action-buttons">
-                        <button id="request-swap-btn" class="action-btn primary">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20q-1.65 0-2.825-.7T7.05 18.05l-2.1 2.1Q4.5 20.6 4.05 20.3t-.3-1.15V14.5q0-.625.438-1.063T5.25 13h4.65q.8 0 .95.85t-.7 1.3L8.2 17.1q.85.8 1.963 1.35T12.45 19q2.4 0 4.025-1.938T18 12.875q0-1.075-.413-2.125T16.4 8.85l1.1-1.1q.8-.8.2-1.85T16.2 5.05L14.9 5.8q-1.2-1.025-2.7-1.588T9 3.55q-3.55 0-6 2.45T.55 12q0 3.3 2.075 5.575T8.1 20.4l-1.9 1.9q-.55.55-.25 1.15t1.05.4h5.75q.65 0 1.075-.425T14.25 22q0-.6-.45-1.05zM18.75 11h-4.65q-.8 0-.95-.85t.7-1.3l1.95-1.95q-.85-.8-1.963-1.35T11.55 5q-2.4 0-4.025 1.938T6 11.125q0 1.075.413 2.125T7.6 15.15l-1.1 1.1q-.8.8-.2 1.85t1.5.85l1.3-.75q1.2 1.025 2.7 1.588T15 20.45q3.55 0 6-2.45t2.45-6.375q0-3.3-2.075-5.575T15.9 3.6l1.9-1.9q.55-.55.25-1.15T16.95.1h-5.75q-.65 0-1.075.425T9.75 2q0 .6.45 1.05z"/></svg>
-                            בקש החלפה
-                        </button>
-                        <button id="request-removal-btn" class="action-btn secondary">
-                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 20q-.825 0-1.413-.588T3 18V6h2v12h10v2zm14-15h-4l-1-1H9L8 5H4v2h15z"/></svg>
-                            בקש פינוי
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order History -->
-            <div class="card history-card">
-                <h2>היסטוריית הזמנות</h2>
-                <div id="history-list">
-                    <!-- History items will be injected by JavaScript -->
-                </div>
-            </div>
-            
-        </main>
-    </div>
-
-    <!-- ⭐ NEW: Driver En Route Overlay ⭐ -->
-    <div id="driver-status-overlay" class="driver-status-overlay">
-        <div class="driver-status-content">
-            <div class="truck-animation">
-                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24"><path fill="currentColor" d="M21.5 15c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5s1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5m-11 0c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5s1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5M19.9 12h-6.19c-.48-1.72-2-3-3.96-3c-2.21 0-4 1.79-4 4s1.79 4 4 4c1.96 0 3.48-1.28 3.96-3h3.18L19 14.4V12M18 6h-4.28c.34-.6.54-1.28.54-2a2.5 2.5 0 0 0-5 0c0 .72.2 1.4.54 2H5c-1.1 0-2 .9-2 2v6h1.22c.55-1.8 2.2-3.11 4.28-3.11c2.21 0 4 1.79 4 4c0 .34-.05.68-.12 1h2.12A2.5 2.5 0 0 0 17.5 14H19v-4l-2-4Z"/></svg>
-            </div>
-            <h2 class="driver-status-title">הנהג בדרך אליך!</h2>
-            <p class="driver-status-subtitle">זמן הגעה משוער בעוד:</p>
-            <div id="eta-timer" class="eta-timer">--:--:--</div>
-        </div>
-    </div>
-    
-    <!-- Notification Permission Modal -->
-    <div id="notification-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2m6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"/></svg>
-            </div>
-            <h2>רוצה לקבל עדכונים חיים?</h2>
-            <p>נשמח לשלוח לך התראות על מצב המכולה והזמן הגעה של הנהג.</p>
-            <div class="modal-actions">
-                <button id="cancel-notifications" class="modal-btn secondary">לא, תודה</button>
-                <button id="confirm-notifications" class="modal-btn primary">כן, בטח!</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="toast-container"></div>
-    
-    <script src="app.js"></script>
+  <script>
+    // JS לכפתור גלילה למעלה
+    const btn = document.getElementById('scroll-top-btn');
+    window.addEventListener('scroll', () => {
+      btn.style.display = window.scrollY > 200 ? 'flex' : 'none';
+    });
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  </script>
 </body>
 </html>
-
