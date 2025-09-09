@@ -1,4 +1,9 @@
-:root {
+/* * styles.css
+ * This file contains all the styling for the CRM application.
+ * It uses CSS variables for easy theming and is built with a mobile-first approach.
+*/
+
+/* =:root {
   --bg: #f4f6f9;
   --card-bg: #fff;
   --primary: #0d6efd;
@@ -7,55 +12,58 @@
   --warning: #ffc107;
   --info: #17a2b8;
   --shadow: 0 6px 20px rgba(0,0,0,0.08);
-  --radius: 14px;
+  --radius: 12px;
   --font: 'Assistant', sans-serif;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: var(--font);
   background: var(--bg);
   color: #222;
+  margin: 0;
   direction: rtl;
 }
 
 .app-frame {
-  max-width: 420px;
+  max-width: 480px;
   margin: auto;
-  padding: 16px;
+  padding: 12px;
   min-height: 100vh;
 }
 
 /* Header */
 .app-header {
   text-align: center;
-  padding: 14px 0;
+  padding: 14px;
   background: var(--primary);
   color: #fff;
-  font-size: 20px;
-  font-weight: bold;
   border-radius: var(--radius);
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   box-shadow: var(--shadow);
 }
-.app-header i {
-  margin-left: 6px;
+.app-header h1 {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+.app-header p {
+  font-size: 14px;
+  opacity: 0.9;
 }
 
 /* Data card */
 .data-card {
   background: var(--card-bg);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 14px;
   box-shadow: var(--shadow);
-  margin-bottom: 20px;
-  animation: fadeIn 0.6s ease-in-out;
 }
 .data-card h2 {
   margin-bottom: 12px;
   font-size: 18px;
   color: var(--primary);
 }
+
+/* Table */
 .table-container {
   overflow-x: auto;
 }
@@ -78,7 +86,7 @@ thead th {
 .badge {
   padding: 4px 10px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 12px;
   color: #fff;
 }
 .success { background: var(--success); }
@@ -86,61 +94,29 @@ thead th {
 .warning { background: var(--warning); color: #000; }
 .info { background: var(--info); }
 
-/* Info cards */
-.info-cards {
-  display: flex;
-  gap: 12px;
-  margin-top: 12px;
-}
-.info-card {
-  flex: 1;
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 14px;
-  text-align: center;
-  box-shadow: var(--shadow);
-  transition: transform 0.3s;
-}
-.info-card:hover {
-  transform: translateY(-5px);
-}
-.info-card i {
-  font-size: 22px;
-  margin-bottom: 6px;
-  color: var(--primary);
-}
-.info-card span {
-  display: block;
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 6px;
-}
-
-/* Scroll top button */
-.scroll-top-btn {
-  position: fixed;
-  top: 18px;
-  right: 18px;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
+/* Action buttons */
+.action-btn {
   border: none;
-  background: var(--primary);
-  color: #fff;
-  font-size: 20px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow);
+  border-radius: 20px;
+  padding: 6px 12px;
+  margin: 2px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  z-index: 100;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
 }
-.scroll-top-btn:hover {
-  background: #0b5ed7;
+.action-btn i {
+  margin-left: 4px;
 }
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.action-btn:hover {
+  transform: scale(1.05);
+}
+.swap {
+  background: var(--info);
+  color: #fff;
+}
+.remove {
+  background: var(--danger);
+  color: #fff;
 }
