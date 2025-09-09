@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>כלי אבחון API</title>
+    <style>
+        body { font-family: Assistant, sans-serif; direction: rtl; padding: 20px; background-color: #f0f2f5; }
+        .container { max-width: 800px; margin: auto; background-color: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #0b72b9; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; direction: ltr; text-align: left; }
+        button { background-color: #0b72b9; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        pre { background-color: #2d3748; color: #90cdf4; padding: 15px; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word; direction: ltr; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>כלי אבחון תקשורת לשרת Apps Script</h1>
+        <p>הכלי הזה יעזור לנו לוודא שהאפליקציה יכולה "לדבר" עם השרת שלך (הקוד ב-Google Sheet).</p>
+
+        <div class="form-group">
+            <label for="apiUrl">1. הדבק כאן את כתובת ה-Web App URL מהפריסה שלך:</label>
+            <input type="text" id="apiUrl" placeholder="https://script.google.com/macros/s/...">
+        </div>
+
+        <div class="form-group">
+            <label for="identifier">2. הזן מספר לקוח או טלפון לבדיקה:</label>
+            <input type="text" id="identifier" value="123">
+        </div>
+
+        <button onclick="testApi()">בצע בדיקה</button>
+
+        <h2>תוצאה:</h2>
+        <pre id="result">ממתין לבדיקה...</pre>
+    </div>
+
+    <script>
+        async function testApi() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const identifier = document.getElementById('identifier').value;
+            const resultBox = document.getElementById('result');
+
+            if (!apiUrl) {
+                resultBox.textContent = 'שגיאה: חובה להזין כתובת URL של ה-API.';
+                return;
+            }
+
+            resultBox.textContent = 'שולח בקשה...';
+
+            try {
+                // Construct the full URL with parameters
+                const testUrl = `${apiUrl}?action=getClientData&identifier=${identifier}`;
+                
+                const response = await fetch(testUrl);
+
+                if (!response.ok) {
+                    throw new Error(`שגיאת רשת (HTTP Status: ${response.status}). ייתכן שההרשאות בפריסה אינן 'Anyone'.`);
+                }
+
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultBox.textContent = '✅ הצלחה! החיבור לשרת תקין.\n\n';
+                    resultBox.textContent += JSON.stringify(data, null, 2);
+                } else {
+                     resultBox.textContent = `❌ השרת ענה, אך עם שגיאה:\n\n`;
+                     resultBox.textContent += JSON.stringify(data, null, 2);
+                }
+
+            } catch (error) {
+                console.error(error);
+                resultBox.textContent = `❌ כישלון קריטי בתקשורת!\n\n`;
+                resultBox.textContent += `הודעת השגיאה: ${error.message}\n\n`;
+                resultBox.textContent += `ב-99% מהמקרים, זה אומר שההגדרה 'Who has access' בפריסה שלך אינה 'Anyone'.`;
+            }
+        }
+    </script>
+</body>
+</html>
+
