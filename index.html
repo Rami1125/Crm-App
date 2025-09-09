@@ -56,10 +56,10 @@
         const customerId = urlParams.get('id');
         document.getElementById('customer-id-display').innerText = `לקוח: ${customerId}`;
 
-        const sheetId = 'YOUR_GOOGLE_SHEET_ID'; // עדכן למזהה הגיליון שלך
-        const sheetName = 'CRM';
+        const sheetId = '1TPwAP0h05IyzvusybJv3zMKSOKpFNUS9jZtEK5pSgps'; // עדכן למזהה הגיליון שלך
+        const sheetName = 'מעקב';
 
-        const API_URL = `https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_ID/exec`;
+        const API_URL = `https://script.google.com/macros/s/AKfycbyd3jl_Rj3qza7W4OMYwyIr3L4m2JhOPxzsg8xaAbWbPY-xB-cq4Z_TVp9tnE0Ltlcy/exec`;
 
         async function fetchOrders() {
             const response = await fetch(`${API_URL}?action=getOrdersByCustomer&id=${customerId}`);
