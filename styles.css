@@ -1,24 +1,20 @@
-/* * styles.css
- * This file contains all the styling for the CRM application.
- * It uses CSS variables for easy theming and is built with a mobile-first approach.
-*/
-
-/* Mobile-first App Style */
-
 :root {
-  --main-bg: #f3f7fa;
-  --card-bg: #ffffff;
+  --bg: #f4f6f9;
+  --card-bg: #fff;
   --primary: #0d6efd;
-  --muted: #6c757d;
-  --radius: 12px;
-  --shadow: 0 6px 16px rgba(0,0,0,0.08);
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --info: #17a2b8;
+  --shadow: 0 6px 20px rgba(0,0,0,0.08);
+  --radius: 14px;
   --font: 'Assistant', sans-serif;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  background: var(--main-bg);
   font-family: var(--font);
+  background: var(--bg);
   color: #222;
   direction: rtl;
 }
@@ -27,37 +23,39 @@ body {
   max-width: 420px;
   margin: auto;
   padding: 16px;
-  position: relative;
   min-height: 100vh;
 }
 
 /* Header */
 .app-header {
   text-align: center;
-  padding: 12px 0;
-  font-size: 20px;
-  font-weight: 700;
+  padding: 14px 0;
   background: var(--primary);
   color: #fff;
+  font-size: 20px;
+  font-weight: bold;
   border-radius: var(--radius);
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   box-shadow: var(--shadow);
 }
+.app-header i {
+  margin-left: 6px;
+}
 
-/* Data table */
+/* Data card */
 .data-card {
   background: var(--card-bg);
   border-radius: var(--radius);
-  padding: 12px;
+  padding: 16px;
   box-shadow: var(--shadow);
   margin-bottom: 20px;
+  animation: fadeIn 0.6s ease-in-out;
 }
 .data-card h2 {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   font-size: 18px;
-  font-weight: 600;
+  color: var(--primary);
 }
-
 .table-container {
   overflow-x: auto;
 }
@@ -67,21 +65,32 @@ table {
 }
 th, td {
   padding: 10px;
-  text-align: right;
-  border-bottom: 1px solid #ddd;
+  text-align: center;
+  border-bottom: 1px solid #eee;
   font-size: 14px;
 }
 thead th {
   background: var(--primary);
   color: #fff;
-  position: sticky;
-  top: 0;
 }
+
+/* Badges */
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #fff;
+}
+.success { background: var(--success); }
+.danger { background: var(--danger); }
+.warning { background: var(--warning); color: #000; }
+.info { background: var(--info); }
 
 /* Info cards */
 .info-cards {
   display: flex;
-  gap: 10px;
+  gap: 12px;
+  margin-top: 12px;
 }
 .info-card {
   flex: 1;
@@ -89,30 +98,49 @@ thead th {
   border-radius: var(--radius);
   padding: 14px;
   text-align: center;
-  font-size: 16px;
   box-shadow: var(--shadow);
+  transition: transform 0.3s;
+}
+.info-card:hover {
+  transform: translateY(-5px);
+}
+.info-card i {
+  font-size: 22px;
+  margin-bottom: 6px;
+  color: var(--primary);
+}
+.info-card span {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 6px;
 }
 
-/* Scroll-top button floating at top-right */
+/* Scroll top button */
 .scroll-top-btn {
   position: fixed;
-  top: 16px;
-  right: 16px;
-  width: 44px;
-  height: 44px;
+  top: 18px;
+  right: 18px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
   background: var(--primary);
   color: #fff;
-  font-size: 24px;
-  font-weight: 700;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
+  font-size: 20px;
   display: none;
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow);
+  cursor: pointer;
   z-index: 100;
 }
 .scroll-top-btn:hover {
   background: #0b5ed7;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
