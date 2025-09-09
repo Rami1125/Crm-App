@@ -520,6 +520,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // ⭐️⭐️⭐️ API URL UPDATED ⭐️⭐️⭐️
             const API_URL = "https://script.google.com/macros/s/AKfycbwtDxDpgzZg0vB2jZ56Y8xQpW3oMGEwsbI6KqP2pgkWb0D_Owj3gtOJ7-jVtWmG5S3r/exec";
             
             const CHAT_TEMPLATES = ["המכולה מלאה, אשמח לתאם פינוי.", "צריך להחליף את המכולה במכולה ריקה.", "האם ניתן לקבל מכולה נוספת?", "מה צפי ההגעה של הנהג?", "תודה רבה על השירות המהיר!", "יש לי שאלה בנוגע לחיוב.", "האם ניתן להאריך את זמן השהייה של המכולה?", "עדכון כתובת - הפינוי יתבצע מכתובת אחרת.", "בקשה דחופה למכולה, אנא צרו קשר.", "הכל בסדר, רק רציתי לוודא שההזמנה התקבלה."];
@@ -566,10 +567,10 @@
                 if (!clientId) return;
                 if (!isRefresh) appContainer.style.opacity = '0.5';
                 try {
-                    const data = await apiGet(`getClientData?identifier=${clientId}`); // Changed to generic identifier
-                    if (!data || !data.clientName) throw new Error("Client not found");
+                    const data = await apiGet(`getClientData?identifier=${clientId}`);
+                    if (data.status === 'error' || !data.clientName) throw new Error(data.message || "Client not found");
                     clientState = { id: data.clientId, name: data.clientName, orders: data.orders || [], addresses: new Set(data.orders.map(o => o['כתובת']).filter(Boolean)), historyChart: clientState.historyChart };
-                    localStorage.setItem('saban_client_id', data.clientId); // Save the actual ID
+                    localStorage.setItem('saban_client_id', data.clientId);
                     renderHeaderAndGreeting();
                     renderHomePage();
                     renderContainersPage();
