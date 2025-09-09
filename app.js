@@ -5,7 +5,9 @@
  */
 
 // --- 1. CONFIGURATION & SETUP ---
-const API_URL = 'https://script.google.com/macros/s/AKfycbyqsUFFmmrToVUEImnjM6Bo9SkzFAIIpZvWM5GoBy_R3cEoV7i4K9xx6M_fqhGpqgms/exec';
+// ⭐ FIX: Updated with the new deployment URL provided by the user.
+const API_URL = 'https://script.google.com/macros/s/AKfycbyunAYo0vtWYh_yYEskFwZ5EzcAeBatP5y0clYVIOV_wKWBhbH6RqLG_p3XJE4q3J2n/exec';
+
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBV_2JwCLtow5F6C7463NmfP2py5W-fj5I",
     authDomain: "hsaban94-cc777.firebaseapp.com",
@@ -187,9 +189,9 @@ async function handleAction(actionType) {
         btn.disabled = false;
         // Restore original button text and icons
         if (actionType === 'swap') {
-            btn.innerHTML = `<svg class="icon" ...>...</svg> בקש החלפה`;
+            btn.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="m17.65 6.35l-1.42 1.42A6.995 6.995 0 0 0 12 4c-3.87 0-7 3.13-7 7s3.13 7 7 7c2.21 0 4.21-.99 5.5-2.64l1.5 1.5A8.96 8.96 0 0 1 12 20a9 9 0 0 1-9-9a9 9 0 0 1 9-9c2.65 0 5.05 1.14 6.78 2.97l1.44-1.44z"/></svg> בקש החלפה`;
         } else {
-            btn.innerHTML = `<svg class="icon" ...>...</svg> בקש פינוי`;
+            btn.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M11 20V8.25q0-.525.338-1.125t.912-.875L16.5 3H6.75q-.95 0-1.687.738T4.325 5.5v13q0 .95.738 1.688T6.75 21H11v-1zm1 1h5.25q.95 0 1.688-.737T19.675 18.5v-13q0-.95-.737-1.688T17.25 3H12v18z"/></svg> בקש פינוי`;
         }
     } 
 }
@@ -343,165 +345,3 @@ async function sendTokenToServer(clientId, token) {
     }
 }
 
-/* app.js - additions for mobile UI: duplicate, help hint, tutorial, ETA positioning */
-
-// --- מסגרת מהקוד הקיים: המתן לטעינת הדף/נתונים ---
-document.addEventListener('DOMContentLoaded', () => {
-  // אם יש פונקציה קיימת שממלאת היסטוריה/הזמנה, קריאה אליה כאן
-  // למשל: initApp(); // <-- אם כבר קיים
-  attachDuplicateHandlers();      // וודא כפתורי שכפול מוגדרים גם לפריטים דינאמיים
-  bindBottomBarButtons();
-  initHelpUI();
-  startEtaTimer(); // אם יש ETA אמיתי, עדכן את פונקציה זו
-});
-
-/* ---------- Duplicate functionality for history items ---------- */
-function attachDuplicateHandlers(){
-  // אם היסטוריית הפריטים נוצרת דינמית יש לקרוא שוב לפונקציה אחרי הזרקה
-  const container = document.getElementById('history-list');
-  if(!container) return;
-  // delegate click using event listener
-  container.addEventListener('click', (ev) => {
-    const btn = ev.target.closest('.duplicate-btn');
-    if(!btn) return;
-    const item = btn.closest('.order-item');
-    if(!item) return;
-    duplicateOrderItem(item);
-  });
-
-  // אם יש already existing items, וודא שיש להם כפתור (זה בעיקר ביטחון)
-  // No-op here — JS event delegation מטפל בכל כפתורים חדשים גם.
-}
-
-function duplicateOrderItem(item){
-  // קריא ומשוב: משכפל ויוצר הזמנה חדשה (דמיונית) — תוכל להחליף בלוגיקה אמיתית ל-POST לשרת.
-  const cloned = item.cloneNode(true);
-  // עדכון מזהה/מספר (להמחשה בלבד)
-  const strong = cloned.querySelector('.details strong');
-  if(strong){
-    // נסמן שכפול ונדביק תו ו־timestamp
-    strong.textContent = strong.textContent + ' • (שכפול)';
-  }
-  // הוספה מיד בראש הרשימה (או לפי הלוגיקה שלך)
-  const container = document.getElementById('history-list');
-  container.insertBefore(cloned, container.firstChild);
-
-  // הצג טוסט קצר
-  showToast('ההזמנה שוכפלה בהצלחה');
-}
-
-/* ---------- Toast helper ---------- */
-function showToast(text, timeout=3000){
-  let container = document.getElementById('toast-container');
-  if(!container){
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-  }
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = text;
-  container.appendChild(t);
-  setTimeout(()=> t.remove(), timeout);
-}
-
-/* ---------- Bottom bar binding ---------- */
-function bindBottomBarButtons(){
-  const btn1 = document.getElementById('bar-action-1');
-  const btn2 = document.getElementById('bar-action-2');
-  if(btn1) btn1.addEventListener('click', ()=> showToast('פותח פרטי הזמנה...'));
-  if(btn2) btn2.addEventListener('click', ()=> showToast('פותח טופס הזמנה חדשה...'));
-}
-
-/* ---------- Help floating hint + tutorial overlay ---------- */
-function initHelpUI(){
-  const helpBtn = document.getElementById('help-floating-btn');
-  const tutorial = document.getElementById('tutorial-overlay');
-  const tutorialClose = document.getElementById('tutorial-close');
-  const tutorialPlay = document.getElementById('tutorial-play');
-
-  if(helpBtn){
-    // short click -> open tutorial overlay
-    helpBtn.addEventListener('click', openTutorial);
-    // appear for 5 seconds then hide automatically (fade in/out)
-    showTemporaryHelpHint(helpBtn, 5000);
-  }
-  if(tutorialClose) tutorialClose.addEventListener('click', closeTutorial);
-  if(tutorialPlay){
-    tutorialPlay.addEventListener('click', ()=> {
-      // דוגמה: הפעל אנימציה פשוטה בתוך ההדרכה (נוכל להוסיף אנימציות מקוריות)
-      tutorialAnimateSteps();
-    });
-  }
-
-  function openTutorial(){
-    if(tutorial) tutorial.style.display = 'flex';
-  }
-  function closeTutorial(){
-    if(tutorial) tutorial.style.display = 'none';
-  }
-}
-
-function showTemporaryHelpHint(node, ms=5000){
-  // הופעה עם אנימציה קלה ואז הסתרה
-  node.style.opacity = 0;
-  node.style.transform = 'translateY(8px)';
-  node.style.transition = 'opacity 320ms ease, transform 320ms ease';
-  // small delay then show
-  requestAnimationFrame(()=> {
-    node.style.opacity = 1;
-    node.style.transform = 'translateY(0)';
-  });
-  // hide after ms
-  setTimeout(()=> {
-    node.style.opacity = 0;
-    node.style.transform = 'translateY(8px)';
-    setTimeout(()=> node.style.display = 'none', 320);
-  }, ms);
-}
-
-/* tutorial animation example */
-function tutorialAnimateSteps(){
-  const overlay = document.getElementById('tutorial-overlay');
-  if(!overlay) return;
-  // temporary highlight sequence (simple)
-  const card = overlay.querySelector('.tutorial-card');
-  if(!card) return;
-  card.animate([
-    { transform: 'translateY(8px)', opacity: 0.9 },
-    { transform: 'translateY(0)', opacity: 1 },
-    { transform: 'translateY(-6px)', opacity: 1 },
-    { transform: 'translateY(0)', opacity: 1 }
-  ], { duration: 2200, easing: 'ease-in-out' });
-}
-
-/* ---------- ETA timer (simple example) ---------- */
-function startEtaTimer(){
-  // אם יש זמן יעד אמיתי – החלף כאן. כדי להמחיש נשתמש ב־5 דקות מהזמן הנוכחי.
-  const etaElement = document.getElementById('eta-timer');
-  if(!etaElement) return;
-  // לדוגמה: ETA = now + 15 minutes (לשינוי לפי נתוני Backend)
-  let target = new Date(Date.now() + (15*60*1000)); // 15 דקות
-  updateTimer();
-  setInterval(updateTimer, 1000);
-  function updateTimer(){
-    const now = new Date();
-    let diff = Math.max(0, target - now);
-    const hrs = Math.floor(diff / (1000*60*60));
-    diff -= hrs * (1000*60*60);
-    const mins = Math.floor(diff / (1000*60));
-    diff -= mins * (1000*60);
-    const secs = Math.floor(diff / 1000);
-    const pad = (v)=> String(v).padStart(2,'0');
-    etaElement.textContent = `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
-    // Also update inline ETA badge in card if present
-    const inline = document.querySelector('.eta-inline');
-    if(inline) inline.textContent = `זמני הגעה: ${pad(mins)} ד' ${pad(secs)}''`;
-  }
-}
-
-/* ---------- Utility: call this after history injection (if you render history items later) */
-function rebindAfterHistoryRender(){
-  attachDuplicateHandlers(); // ensures duplicates respond
-}
