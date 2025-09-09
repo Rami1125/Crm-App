@@ -1,83 +1,132 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ניהול מכולות - CRM</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM אפליקציה סלולרי</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Loader -->
-  <div id="loader" class="loader">
-    <p>טוען נתונים...</p>
-  </div>
+    <div class="app-container">
+        <header>
+            <h1>CRM - הזמנות לקוח</h1>
+            <div id="customer-id-display"></div>
+        </header>
 
-  <div id="app-content" class="app hidden">
-    <header class="app-header">
-      <h1 id="client-name">שלום, לקוח</h1>
-    </header>
+        <section id="active-order" class="order-box">
+            <h2>הזמנה פעילה</h2>
+            <div class="order-info">
+                <span id="arrival-time"></span>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="order-buttons">
+                    <button class="action-btn" id="replace-btn">החלפת מכולה</button>
+                    <button class="action-btn" id="clear-btn">פינוי</button>
+                </div>
+            </div>
+        </section>
 
-    <!-- מדדים ללקוח -->
-    <section id="client-metrics" class="card metrics">
-      <h2>סטטוס לקוח #<span id="client-id"></span></h2>
-      <div class="metrics-grid">
-        <div class="metric">
-          <span class="metric-label">מכולות פעילות</span>
-          <span id="active-containers" class="metric-value">0</span>
-        </div>
-        <div class="metric">
-          <span class="metric-label">הזמנות שבוצעו</span>
-          <span id="total-orders" class="metric-value">0</span>
-        </div>
-        <div class="metric">
-          <span class="metric-label">ימים באתר</span>
-          <span id="total-days" class="metric-value">0</span>
-        </div>
-      </div>
-    </section>
+        <section id="order-history" class="order-box">
+            <h2>היסטוריית הזמנות</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>מספר הזמנה</th>
+                        <th>תאריך</th>
+                        <th>סטטוס</th>
+                        <th>הערות</th>
+                    </tr>
+                </thead>
+                <tbody id="history-table"></tbody>
+            </table>
+        </section>
 
-    <!-- הזמנה פעילה -->
-    <section id="active-order-section" class="card">
-      <h2>הזמנה פעילה</h2>
-      <p><strong>מספר הזמנה:</strong> <span id="order-id"></span></p>
-      <p><strong>כתובת:</strong> <span id="order-address"></span></p>
-      <p><strong>סטטוס:</strong> <span id="status-badge" class="status-badge"></span></p>
-      <p><strong>ימים באתר:</strong> <span id="days-on-site">0</span></p>
-      <p><strong>פעולה אחרונה:</strong> <span id="last-action"></span></p>
+        <section id="charts" class="order-box">
+            <h2>תרשים סטטוס הזמנות</h2>
+            <canvas id="statusChart"></canvas>
+        </section>
 
-      <!-- Progress Bar -->
-      <div class="progress-container">
-        <div id="order-progress-bar" class="progress-bar"></div>
-      </div>
-      <div class="progress-dates">
-        <span id="progress-start-date"></span> - <span id="progress-end-date"></span>
-      </div>
-
-      <!-- כפתורי פעולה -->
-      <div class="actions">
-        <button id="request-swap-btn" class="btn swap">
-          🔄 בקש החלפה
-        </button>
-        <button id="request-removal-btn" class="btn removal">
-          🗑 בקש פינוי
-        </button>
-      </div>
-    </section>
-
-    <div id="no-active-order" class="card empty">
-      אין הזמנה פעילה כרגע.
+        <button id="scroll-top" class="scroll-btn">▲ למעלה</button>
     </div>
 
-    <!-- היסטוריית הזמנות -->
-    <section class="card">
-      <h2>היסטוריית הזמנות</h2>
-      <div id="history-list" class="history-list"></div>
-    </section>
-  </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const customerId = urlParams.get('id');
+        document.getElementById('customer-id-display').innerText = `לקוח: ${customerId}`;
 
-  <!-- Toast container -->
-  <div id="toast-container" class="toast-container"></div>
+        const sheetId = 'YOUR_GOOGLE_SHEET_ID'; // עדכן למזהה הגיליון שלך
+        const sheetName = 'CRM';
 
-  <script src="app.js"></script>
+        const API_URL = `https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_ID/exec`;
+
+        async function fetchOrders() {
+            const response = await fetch(`${API_URL}?action=getOrdersByCustomer&id=${customerId}`);
+            const data = await response.json();
+            return data;
+        }
+
+        function startProgressTimer(endTime) {
+            const progressBar = document.getElementById('progress-bar');
+            function update() {
+                const now = new Date();
+                const total = new Date(endTime) - now;
+                const percent = Math.max(0, Math.min(100, 100 - (total / (new Date(endTime) - now) * 100)));
+                progressBar.style.width = percent + '%';
+                if (total > 0) {
+                    requestAnimationFrame(update);
+                }
+            }
+            update();
+        }
+
+        function renderOrders(data) {
+            if (!data || data.length === 0) return;
+
+            const activeOrder = data.find(o => o.status === 'פעיל');
+            if (activeOrder) {
+                document.getElementById('arrival-time').innerText = `הגעה משוערת: ${activeOrder.arrivalTime}`;
+                startProgressTimer(activeOrder.endTime);
+            }
+
+            const historyTable = document.getElementById('history-table');
+            historyTable.innerHTML = '';
+            data.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${order.orderNumber}</td>
+                    <td>${order.date}</td>
+                    <td>${order.status}</td>
+                    <td>${order.notes}</td>
+                `;
+                historyTable.appendChild(tr);
+            });
+
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            const statusCounts = data.reduce((acc, order) => {
+                acc[order.status] = (acc[order.status] || 0) + 1;
+                return acc;
+            }, {});
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        label: 'מספר הזמנות',
+                        data: Object.values(statusCounts),
+                        backgroundColor: '#0ff'
+                    }]
+                },
+                options: { plugins: { legend: { display: false } }, responsive: true }
+            });
+        }
+
+        fetchOrders().then(renderOrders);
+
+        document.getElementById('scroll-top').addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
 </body>
 </html>
