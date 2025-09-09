@@ -23,6 +23,29 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
 </head>
 <body>
+    <div class="bottom-bar" aria-hidden="false">
+  <button id="bar-action-1" class="bar-btn primary" title="פרטי הזמנה">הצג הזמנה</button>
+  <button id="bar-action-2" class="bar-btn secondary" title="הזמנה חדשה">הזמנה חדשה</button>
+</div>
+
+<!-- help floating hint (מופיע ל-5s) -->
+<button id="help-floating-btn" class="help-floating" aria-label="הדרכה מהירה">
+  ? הדרכה מהירה
+</button>
+<!-- tutorial overlay (hidden) -->
+<div id="tutorial-overlay" class="tutorial-overlay" style="display:none;">
+  <div class="tutorial-card">
+    <h3 style="margin:0 0 8px 0">הדרכה — איך להשתמש באפליקציה</h3>
+    <div class="tutorial-step">1. בדף הבית ראה את ההזמנה הפעילה והזמן הגעה.</div>
+    <div class="tutorial-step">2. השתמש בכפתורים התחתונים להזמנה/בקשת פינוי.</div>
+    <div class="tutorial-step">3. ברשימת ההיסטוריה: הקש על אייקון השכפול כדי לשכפל הזמנה קיימת.</div>
+    <div style="font-size:13px;color:#666;margin-top:8px">הדרכה מונפשת — הקש על סגור להמשיך</div>
+    <div class="tutorial-actions">
+      <button id="tutorial-close" class="bar-btn primary" style="width:140px">סגור</button>
+      <button id="tutorial-play" class="bar-btn secondary" style="width:120px">הפעל האנימציה</button>
+    </div>
+  </div>
+</div>
     <!-- Main App Container -->
     <div class="app-container">
         <!-- Loader Overlay -->
@@ -81,6 +104,32 @@
                         </div>
                     </div>
                 </div>
+                    <!-- בתוך <main id="app-content"> אחרי היסטוריית ההזמנות -->
+<!-- bottom fixed action bar (מובייל) -->
+<div class="bottom-bar" aria-hidden="false">
+  <button id="bar-action-1" class="bar-btn primary" title="פרטי הזמנה">הצג הזמנה</button>
+  <button id="bar-action-2" class="bar-btn secondary" title="הזמנה חדשה">הזמנה חדשה</button>
+</div>
+
+<!-- help floating hint (מופיע ל-5s) -->
+<button id="help-floating-btn" class="help-floating" aria-label="הדרכה מהירה">
+  ? הדרכה מהירה
+</button>
+
+<!-- tutorial overlay (hidden) -->
+<div id="tutorial-overlay" class="tutorial-overlay" style="display:none;">
+  <div class="tutorial-card">
+    <h3 style="margin:0 0 8px 0">הדרכה — איך להשתמש באפליקציה</h3>
+    <div class="tutorial-step">1. בדף הבית ראה את ההזמנה הפעילה והזמן הגעה.</div>
+    <div class="tutorial-step">2. השתמש בכפתורים התחתונים להזמנה/בקשת פינוי.</div>
+    <div class="tutorial-step">3. ברשימת ההיסטוריה: הקש על אייקון השכפול כדי לשכפל הזמנה קיימת.</div>
+    <div style="font-size:13px;color:#666;margin-top:8px">הדרכה מונפשת — הקש על סגור להמשיך</div>
+    <div class="tutorial-actions">
+      <button id="tutorial-close" class="bar-btn primary" style="width:140px">סגור</button>
+      <button id="tutorial-play" class="bar-btn secondary" style="width:120px">הפעל האנימציה</button>
+    </div>
+  </div>
+</div>
 
                 <!-- Main Actions -->
                 <div class="card actions-card">
