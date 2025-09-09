@@ -26,47 +26,14 @@
             --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overflow: hidden; background-color: var(--bg); }
+        body { font-family: 'Assistant', sans-serif; color: var(--text-dark); display: flex; flex-direction: column; overscroll-behavior-y: contain; }
 
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            background-color: var(--bg);
-        }
-
-        body {
-            font-family: 'Assistant', sans-serif;
-            color: var(--text-dark);
-            display: flex;
-            flex-direction: column;
-            overscroll-behavior-y: contain;
-        }
-
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 15px;
-            background-color: var(--card);
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-        }
+        .app-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background-color: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .header-profile { display: flex; align-items: center; gap: 10px; }
         .header-profile img { width: 32px; height: 32px; border-radius: 50%; }
         .header-profile-name { font-weight: 700; font-size: 16px; }
@@ -75,312 +42,69 @@
         .header-status { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; }
         .online-dot { width: 10px; height: 10px; background-color: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
 
-        .app-container {
-            flex-grow: 1;
-            overflow: hidden;
-            position: relative;
-        }
+        .app-container { flex-grow: 1; overflow: hidden; position: relative; }
+        .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding: 20px 15px 120px 15px; -webkit-overflow-scrolling: touch; background-color: var(--bg); visibility: hidden; opacity: 0; transform: translateX(100%); }
+        .page.active { visibility: visible; opacity: 1; transform: translateX(0); transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s; }
+        .page.exiting { transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s; }
 
-        .page {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow-y: auto;
-            padding: 20px 15px 120px 15px;
-            -webkit-overflow-scrolling: touch;
-            background-color: var(--bg);
-            visibility: hidden;
-            opacity: 0;
-            transform: translateX(100%);
-        }
-
-        .page.active {
-            visibility: visible;
-            opacity: 1;
-            transform: translateX(0);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s;
-        }
-
-        .page.exiting {
-            transform: translateX(-100%);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s;
-        }
-
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 80px;
-            background-color: var(--card);
-            display: flex;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            border-top: 1px solid var(--border);
-            z-index: 1000;
-        }
-
-        .nav-btn {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .nav-btn.active {
-            color: var(--brand);
-            background-color: #f8faff;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background-color: var(--card); display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); border-top: 1px solid var(--border); z-index: 1000; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s ease-in-out; }
+        .nav-btn.active { color: var(--brand); background-color: #f8faff; }
+        .nav-btn:active { transform: scale(0.95); background-color: rgba(11, 114, 185, 0.1); }
+        .nav-btn svg { width: 28px; height: 28px; }
         
-        .nav-btn:active {
-            transform: scale(0.95);
-            background-color: rgba(11, 114, 185, 0.1);
-        }
-
-        .nav-btn svg {
-            width: 28px;
-            height: 28px;
-        }
-        
-        .card {
-            background-color: var(--card);
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        
-        .page-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 20px;
-        }
-        
-        .btn {
-            background: var(--brand);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 16px;
-            width: 100%;
-            transition: all 0.2s ease-in-out;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+        .card { background-color: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border); animation: fadeIn 0.5s ease-out forwards; }
+        .page-title { font-size: 28px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px; }
+        .btn { background: var(--brand); color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 16px; width: 100%; transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn.secondary { background-color: #eef2f7; color: var(--text-dark); }
         .btn:active { transform: scale(0.98); }
 
-        /* Home Page */
-         .eta-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-radius: var(--radius);
-            background-color: #f8faff;
-            border: 1px solid var(--border);
-        }
-        .eta-card.active {
-             background: linear-gradient(135deg, #e6f7ff, #e0f2f1);
-        }
-        .eta-card.active .eta-label {
-            color: var(--brand);
-        }
+        .eta-card { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: var(--radius); background-color: #f8faff; border: 1px solid var(--border); }
+        .eta-card.active { background: linear-gradient(135deg, #e6f7ff, #e0f2f1); }
+        .eta-card.active .eta-label { color: var(--brand); }
         .eta-info .label { font-size: 14px; color: var(--text-muted); }
         .eta-info .value { font-size: 18px; font-weight: 700; }
         .eta-truck { font-size: 32px; animation: pulse 2s infinite ease-in-out; }
 
-        /* "My Containers" Page */
-        .progress-bar {
-            width: 100%;
-            height: 12px;
-            background-color: #e0e0e0;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-        .progress-bar-inner {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), #a5d6a7);
-            border-radius: 6px;
-            transition: width 0.5s ease;
-            animation: neon-blink 2s infinite alternate;
-        }
-        .progress-bar.warning .progress-bar-inner {
-            background: linear-gradient(90deg, var(--warning), #ffcc80);
-        }
-        .progress-bar.danger .progress-bar-inner {
-            background: linear-gradient(90deg, var(--danger), #ef9a9a);
-        }
+        .progress-bar { width: 100%; height: 12px; background-color: #e0e0e0; border-radius: 6px; overflow: hidden; margin-top: 5px; }
+        .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--success), #a5d6a7); border-radius: 6px; transition: width 0.5s ease; animation: neon-blink 2s infinite alternate; }
+        .progress-bar.warning .progress-bar-inner { background: linear-gradient(90deg, var(--warning), #ffcc80); }
+        .progress-bar.danger .progress-bar-inner { background: linear-gradient(90deg, var(--danger), #ef9a9a); }
 
-        /* History Page */
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        .history-table th, .history-table td {
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-            text-align: right;
-        }
+        .history-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .history-table th, .history-table td { padding: 10px; border-bottom: 1px solid var(--border); text-align: right; }
         .history-table th { font-weight: 700; }
 
-        /* Chat Page */
-        .chat-templates {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .template-btn {
-            background-color: #f8faff;
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 8px;
-            text-align: right;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .template-btn:hover {
-            border-color: var(--brand);
-            color: var(--brand);
-        }
+        .chat-templates { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .template-btn { background-color: #f8faff; border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: right; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+        .template-btn:hover { border-color: var(--brand); color: var(--brand); }
         
-        /* Floating Action Button (FAB) */
-        .fab-container {
-            position: fixed;
-            bottom: 100px;
-            left: 20px;
-            z-index: 1000;
-        }
-        .fab {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--brand);
-            color: white;
-            border: none;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
+        .fab-container { position: fixed; bottom: 100px; left: 20px; z-index: 1000; }
+        .fab { width: 60px; height: 60px; border-radius: 50%; background-color: var(--brand); color: white; border: none; box-shadow: 0 8px 20px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         .fab.active { transform: rotate(135deg); }
-        .fab-actions {
-            position: absolute;
-            bottom: 75px;
-            left: 5px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
+        .fab-actions { position: absolute; bottom: 75px; left: 5px; display: flex; flex-direction: column; gap: 15px; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .fab-container.active .fab-actions { opacity: 1; visibility: visible; }
-        .fab-action {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-dark);
-            text-decoration: none;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-        }
+        .fab-action { display: flex; align-items: center; gap: 12px; color: var(--text-dark); text-decoration: none; transform: translateY(20px); transition: all 0.3s ease; }
         .fab-container.active .fab-action { transform: translateY(0); }
-        .fab-action .label {
-            background-color: var(--card);
-            padding: 6px 12px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        .fab-action .icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
+        .fab-action .label { background-color: var(--card); padding: 6px 12px; border-radius: 8px; box-shadow: var(--shadow); font-weight: 600; white-space: nowrap; }
+        .fab-action .icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .fab-action .icon.download { background-color: var(--success); }
         .fab-action .icon.swap { background-color: var(--accent); }
         .fab-action .icon.pickup { background-color: var(--danger); }
         
-        /* Scroll to Top Button */
-        .scroll-to-top {
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background-color: rgba(0,0,0,0.4);
-            color: white;
-            border: none;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        .scroll-to-top.show {
-            display: flex;
-            opacity: 1;
-        }
+        .scroll-to-top { position: fixed; bottom: 100px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background-color: rgba(0,0,0,0.4); color: white; border: none; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 999; opacity: 0; transition: opacity 0.3s, transform 0.3s; }
+        .scroll-to-top.show { display: flex; opacity: 1; }
         
-        /* Modal and Form Styling */
-         .modal-overlay {
-            position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); display: flex;
-            align-items: center; justify-content: center; z-index: 2000; opacity: 0;
-            visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
-        }
+         .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
         .modal-overlay.show { opacity: 1; visibility: visible; }
-        .modal-content {
-            background-color: white; padding: 25px; border-radius: var(--radius);
-            width: 90%; max-width: 500px; position: relative; transform: scale(0.95);
-            transition: transform 0.3s;
-        }
+        .modal-content { background-color: white; padding: 25px; border-radius: var(--radius); width: 90%; max-width: 500px; position: relative; transform: scale(0.95); transition: transform 0.3s; }
         .modal-overlay.show .modal-content { transform: scale(1); }
-        .modal-close {
-            position: absolute; top: 10px; left: 15px; background: none;
-            border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-muted);
-        }
+        .modal-close { position: absolute; top: 10px; left: 15px; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-muted); }
         .form-group { margin-bottom: 18px; }
-        .form-group label {
-            display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand);
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 12px; border: 1px solid var(--border);
-            border-radius: 8px; box-sizing: border-box; font-size: 16px;
-            font-family: 'Assistant', sans-serif;
-        }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--brand); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 16px; font-family: 'Assistant', sans-serif; }
+        .debug-panel { display: none; background: #2d3748; color: #fff; padding: 15px; margin-top: 20px; border-radius: var(--radius); }
+        .debug-panel pre { background: #1a202c; padding: 10px; border-radius: 8px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;}
     </style>
 </head>
 <body>
@@ -517,15 +241,25 @@
             </form>
         </div>
     </div>
+    
+    <div class="debug-panel" id="debug-panel">
+        <h3>מצב טכנאי</h3>
+        <p><strong>כתובת API:</strong> <code id="debug-api-url"></code></p>
+        <p><strong>מזהה לקוח:</strong> <code id="debug-client-id"></code></p>
+        <button id="debug-run-test" class="btn secondary" style="width: auto;">בצע בדיקת תקשורת</button>
+        <h4>תגובת שרת:</h4>
+        <pre id="debug-response">לחץ על הכפתור לבדיקה...</pre>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // ⭐️⭐️⭐️ API URL UPDATED ⭐️⭐️⭐️
             const API_URL = "https://script.google.com/macros/s/AKfycbzQGxEb6L-nO8IZFdapEFnzqgRQys51uconI3fJQ7MyjDSkoVijig50AjIkzArSDK6HnQ/exec";
             
             const CHAT_TEMPLATES = ["המכולה מלאה, אשמח לתאם פינוי.", "צריך להחליף את המכולה במכולה ריקה.", "האם ניתן לקבל מכולה נוספת?", "מה צפי ההגעה של הנהג?", "תודה רבה על השירות המהיר!", "יש לי שאלה בנוגע לחיוב.", "האם ניתן להאריך את זמן השהייה של המכולה?", "עדכון כתובת - הפינוי יתבצע מכתובת אחרת.", "בקשה דחופה למכולה, אנא צרו קשר.", "הכל בסדר, רק רציתי לוודא שההזמנה התקבלה."];
             let clientState = { id: null, name: null, orders: [], addresses: new Set(), historyChart: null };
             let refreshInterval;
+            
+            // DOM Elements
             const appContainer = document.getElementById('app-container');
             const pages = document.querySelectorAll('.page');
             const clientNameHeader = document.getElementById('client-name-header');
@@ -551,6 +285,7 @@
             const orderFormModal = document.getElementById('new-order-form-modal');
             const addressSelectModal = document.getElementById('address-select-modal');
             const getLocationBtn = document.getElementById('get-location-btn');
+            const debugPanel = document.getElementById('debug-panel');
 
             function initApp() {
                 setupEventListeners();
@@ -561,6 +296,12 @@
                 else promptForClientId();
                 if (refreshInterval) clearInterval(refreshInterval);
                 refreshInterval = setInterval(() => loadClientData(clientState.id, true), 60000);
+                
+                // Activate debug mode if URL parameter is present
+                const urlParams = new URLSearchParams(window.location.search);
+                if(urlParams.get('debug') === 'true') {
+                    debugPanel.style.display = 'block';
+                }
             }
 
             async function loadClientData(clientId, isRefresh = false) {
@@ -579,7 +320,7 @@
                 } catch (error) {
                     console.error("Failed to load client data:", error);
                     localStorage.removeItem('saban_client_id');
-                    if (error.message.includes("Client not found")) alert("מספר לקוח או טלפון לא נמצאו. אנא ודא שהקלדת את הפרט הנכון ונסה שוב.");
+                    if (error.message.includes("not found")) alert("מספר לקוח או טלפון לא נמצאו. אנא ודא שהקלדת את הפרט הנכון ונסה שוב.");
                     else alert("שגיאה בטעינת נתוני לקוח. אנא בדוק את חיבור האינטרנט ונסה שוב.");
                     promptForClientId();
                 } finally {
@@ -587,8 +328,8 @@
                 }
             }
 
-            async function apiGet(queryString) { const response = await fetch(`${API_URL}?${queryString}`); if (!response.ok) throw new Error('Network response was not ok.'); return await response.json(); }
-            async function apiPost(body) { const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }); if (!response.ok) throw new Error('Network response was not ok.'); return await response.json(); }
+            async function apiGet(queryString) { const response = await fetch(`${API_URL}?${queryString}`); if (!response.ok) throw new Error(`שגיאת רשת (סטטוס ${response.status})`); return await response.json(); }
+            async function apiPost(body) { const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }); if (!response.ok) throw new Error(`שגיאת רשת (סטטוס ${response.status})`); return await response.json(); }
 
             function promptForClientId() {
                 const identifier = prompt("שלום! אנא הזן מספר לקוח או מספר טלפון כדי להתחבר:");
@@ -695,6 +436,22 @@
                 orderFormModal.addEventListener('submit', handleNewOrderSubmit);
                 chatForm.addEventListener('submit', handleChatSubmit);
                 getLocationBtn.addEventListener('click', handleGetLocation);
+                
+                // Debug panel listener
+                document.getElementById('debug-run-test').addEventListener('click', () => {
+                    const clientId = localStorage.getItem('saban_client_id') || 'not set';
+                    document.getElementById('debug-client-id').textContent = clientId;
+                    document.getElementById('debug-api-url').textContent = API_URL;
+                    const responseBox = document.getElementById('debug-response');
+                    responseBox.textContent = 'בודק...';
+                    apiGet(`getClientData?identifier=${clientId}`)
+                        .then(data => {
+                            responseBox.textContent = JSON.stringify(data, null, 2);
+                        })
+                        .catch(err => {
+                            responseBox.textContent = `שגיאה:\n${err.toString()}`;
+                        });
+                });
             }
             
             function navigateTo(pageId) {
