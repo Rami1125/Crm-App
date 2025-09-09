@@ -2,87 +2,82 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>היסטוריית הזמנות - ח. סבן</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ניהול מכולות - CRM</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-
-  <div class="app-frame">
-
-    <header class="app-header">
-      <h1><i class="fa-solid fa-truck"></i> היסטוריית הזמנות</h1>
-      <p id="client-id-label"></p>
-    </header>
-
-    <main class="main-content">
-      <section class="data-card">
-        <h2><i class="fa-solid fa-box-archive"></i> הזמנות קודמות</h2>
-        <div class="table-container">
-          <table id="orders-table">
-            <thead>
-              <tr>
-                <th>מס' הזמנה</th>
-                <th>תאריך</th>
-                <th>סטטוס</th>
-                <th>פעולות</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- נתוני הזמנות יוזרקו כאן -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
+  <!-- Loader -->
+  <div id="loader" class="loader">
+    <p>טוען נתונים...</p>
   </div>
 
-  <script>
-    // --- קריאת פרמטר id מה-URL ---
-    function getClientIdFromUrl() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('id');
-    }
+  <div id="app-content" class="app hidden">
+    <header class="app-header">
+      <h1 id="client-name">שלום, לקוח</h1>
+    </header>
 
-    const clientId = getClientIdFromUrl();
-    document.getElementById("client-id-label").innerText = "מספר לקוח: " + clientId;
+    <!-- מדדים ללקוח -->
+    <section id="client-metrics" class="card metrics">
+      <h2>סטטוס לקוח #<span id="client-id"></span></h2>
+      <div class="metrics-grid">
+        <div class="metric">
+          <span class="metric-label">מכולות פעילות</span>
+          <span id="active-containers" class="metric-value">0</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">הזמנות שבוצעו</span>
+          <span id="total-orders" class="metric-value">0</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">ימים באתר</span>
+          <span id="total-days" class="metric-value">0</span>
+        </div>
+      </div>
+    </section>
 
-    // --- הדמיה: נתוני הזמנות של לקוח (בפועל זה יבוא מה-Apps Script שלך) ---
-    const mockOrders = [
-      { id: "601963", orderId: "A1001", date: "2025-09-01", status: "פעילה" },
-      { id: "601963", orderId: "A0998", date: "2025-08-22", status: "הסתיימה" },
-      { id: "601963", orderId: "A0991", date: "2025-08-10", status: "בדרך" },
-      { id: "123456", orderId: "B2001", date: "2025-08-05", status: "פעילה" }
-    ];
+    <!-- הזמנה פעילה -->
+    <section id="active-order-section" class="card">
+      <h2>הזמנה פעילה</h2>
+      <p><strong>מספר הזמנה:</strong> <span id="order-id"></span></p>
+      <p><strong>כתובת:</strong> <span id="order-address"></span></p>
+      <p><strong>סטטוס:</strong> <span id="status-badge" class="status-badge"></span></p>
+      <p><strong>ימים באתר:</strong> <span id="days-on-site">0</span></p>
+      <p><strong>פעולה אחרונה:</strong> <span id="last-action"></span></p>
 
-    // --- סינון לפי מספר לקוח ---
-    const clientOrders = mockOrders.filter(o => o.id === clientId);
+      <!-- Progress Bar -->
+      <div class="progress-container">
+        <div id="order-progress-bar" class="progress-bar"></div>
+      </div>
+      <div class="progress-dates">
+        <span id="progress-start-date"></span> - <span id="progress-end-date"></span>
+      </div>
 
-    const tableBody = document.querySelector("#orders-table tbody");
+      <!-- כפתורי פעולה -->
+      <div class="actions">
+        <button id="request-swap-btn" class="btn swap">
+          🔄 בקש החלפה
+        </button>
+        <button id="request-removal-btn" class="btn removal">
+          🗑 בקש פינוי
+        </button>
+      </div>
+    </section>
 
-    clientOrders.forEach(order => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${order.orderId}</td>
-        <td>${order.date}</td>
-        <td><span class="badge ${getStatusClass(order.status)}">${order.status}</span></td>
-        <td>
-          <button class="action-btn swap"><i class="fa-solid fa-repeat"></i> החלפה</button>
-          <button class="action-btn remove"><i class="fa-solid fa-trash"></i> פינוי</button>
-        </td>
-      `;
-      tableBody.appendChild(row);
-    });
+    <div id="no-active-order" class="card empty">
+      אין הזמנה פעילה כרגע.
+    </div>
 
-    function getStatusClass(status) {
-      switch (status) {
-        case "פעילה": return "success";
-        case "בדרך": return "info";
-        case "הסתיימה": return "warning";
-        default: return "danger";
-      }
-    }
-  </script>
+    <!-- היסטוריית הזמנות -->
+    <section class="card">
+      <h2>היסטוריית הזמנות</h2>
+      <div id="history-list" class="history-list"></div>
+    </section>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
