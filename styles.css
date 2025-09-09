@@ -120,3 +120,129 @@ thead th {
   background: var(--danger);
   color: #fff;
 }
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f5f6fa;
+  color: #333;
+  direction: rtl;
+}
+
+.app-header {
+  background: linear-gradient(135deg, #2d89ef, #6ab1f7);
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  margin: 1rem;
+  padding: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.metrics-grid {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+.metric {
+  text-align: center;
+}
+.metric-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+}
+.metric-value {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-top: 0.2rem;
+}
+
+.status-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+  font-weight: bold;
+}
+.status-badge.open { background: #dfffd6; color: #1c7c2b; }
+.status-badge.closed { background: #ffe0e0; color: #9a1c1c; }
+
+.progress-container {
+  background: #eee;
+  border-radius: 10px;
+  height: 10px;
+  margin: 0.8rem 0;
+}
+.progress-bar {
+  height: 10px;
+  border-radius: 10px;
+  background: #2d89ef;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+.progress-bar.warning { background: #f6c23e; }
+.progress-bar.danger { background: #e74a3b; }
+.progress-bar.success { background: #28a745; }
+
+.actions {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+.btn {
+  flex: 1;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s ease, background 0.2s;
+}
+.btn.swap { background: #0078d7; color: white; }
+.btn.removal { background: #dc3545; color: white; }
+.btn:hover { transform: scale(1.05); }
+
+.history-list {
+  margin-top: 1rem;
+}
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem;
+  border-bottom: 1px solid #eee;
+}
+.history-item:last-child { border-bottom: none; }
+
+.empty {
+  text-align: center;
+  color: #777;
+}
+
+.toast-container {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.toast {
+  background: #2d89ef;
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
