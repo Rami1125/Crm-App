@@ -3,77 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>אפליקציית ניהול</title>
+  <title>היסטוריית הזמנות - ח. סבן</title>
   <link rel="stylesheet" href="styles.css">
-
-  <!-- ספריית אייקונים -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
   <div class="app-frame">
+
     <header class="app-header">
-      <h1><i class="fa-solid fa-mobile-screen"></i> אפליקציית ניהול</h1>
+      <h1><i class="fa-solid fa-truck"></i> היסטוריית הזמנות</h1>
+      <p id="client-id-label"></p>
     </header>
 
     <main class="main-content">
-
-      <!-- טבלת נתונים -->
       <section class="data-card">
-        <h2><i class="fa-solid fa-table"></i> טבלת נתונים</h2>
+        <h2><i class="fa-solid fa-box-archive"></i> הזמנות קודמות</h2>
         <div class="table-container">
-          <table>
+          <table id="orders-table">
             <thead>
               <tr>
-                <th>מספר</th>
+                <th>מס' הזמנה</th>
+                <th>תאריך</th>
                 <th>סטטוס</th>
-                <th>שעה</th>
+                <th>פעולות</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>001</td><td><span class="badge success">פעילה</span></td><td>12:30</td></tr>
-              <tr><td>002</td><td><span class="badge warning">ממתינה</span></td><td>09:45</td></tr>
-              <tr><td>003</td><td><span class="badge info">בדרך</span></td><td>14:10</td></tr>
-              <tr><td>004</td><td><span class="badge danger">בוטלה</span></td><td>16:00</td></tr>
+              <!-- נתוני הזמנות יוזרקו כאן -->
             </tbody>
           </table>
         </div>
       </section>
-
-      <!-- כרטיסי מדדים -->
-      <section class="info-cards">
-        <div class="info-card">
-          <i class="fa-solid fa-user-check"></i>
-          <p>לקוחות פעילים</p>
-          <span>14</span>
-        </div>
-        <div class="info-card">
-          <i class="fa-solid fa-truck"></i>
-          <p>הזמנות פתוחות</p>
-          <span>9</span>
-        </div>
-        <div class="info-card">
-          <i class="fa-solid fa-box"></i>
-          <p>מכולות בשימוש</p>
-          <span>14</span>
-        </div>
-      </section>
-
     </main>
   </div>
 
-  <!-- כפתור גלילה למעלה -->
-  <button id="scroll-top-btn" class="scroll-top-btn" title="חזרה למעלה">
-    <i class="fa-solid fa-arrow-up"></i>
-  </button>
-
   <script>
-    // JS לכפתור גלילה למעלה
-    const btn = document.getElementById('scroll-top-btn');
-    window.addEventListener('scroll', () => {
-      btn.style.display = window.scrollY > 200 ? 'flex' : 'none';
+    // --- קריאת פרמטר id מה-URL ---
+    function getClientIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
+    }
+
+    const clientId = getClientIdFromUrl();
+    document.getElementById("client-id-label").innerText = "מספר לקוח: " + clientId;
+
+    // --- הדמיה: נתוני הזמנות של לקוח (בפועל זה יבוא מה-Apps Script שלך) ---
+    const mockOrders = [
+      { id: "601963", orderId: "A1001", date: "2025-09-01", status: "פעילה" },
+      { id: "601963", orderId: "A0998", date: "2025-08-22", status: "הסתיימה" },
+      { id: "601963", orderId: "A0991", date: "2025-08-10", status: "בדרך" },
+      { id: "123456", orderId: "B2001", date: "2025-08-05", status: "פעילה" }
+    ];
+
+    // --- סינון לפי מספר לקוח ---
+    const clientOrders = mockOrders.filter(o => o.id === clientId);
+
+    const tableBody = document.querySelector("#orders-table tbody");
+
+    clientOrders.forEach(order => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${order.orderId}</td>
+        <td>${order.date}</td>
+        <td><span class="badge ${getStatusClass(order.status)}">${order.status}</span></td>
+        <td>
+          <button class="action-btn swap"><i class="fa-solid fa-repeat"></i> החלפה</button>
+          <button class="action-btn remove"><i class="fa-solid fa-trash"></i> פינוי</button>
+        </td>
+      `;
+      tableBody.appendChild(row);
     });
-    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    function getStatusClass(status) {
+      switch (status) {
+        case "פעילה": return "success";
+        case "בדרך": return "info";
+        case "הסתיימה": return "warning";
+        default: return "danger";
+      }
+    }
   </script>
 </body>
 </html>
