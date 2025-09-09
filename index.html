@@ -3,42 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>יישום סלולרי – טבלת נתונים</title>
+  <title>אפליקציית ניהול</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- ספריית אייקונים -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
   <div class="app-frame">
     <header class="app-header">
-      <h1>אפליקציית סלולרי</h1>
+      <h1><i class="fa-solid fa-mobile-screen"></i> אפליקציית ניהול</h1>
     </header>
 
     <main class="main-content">
+
+      <!-- טבלת נתונים -->
       <section class="data-card">
-        <h2>טבלת נתונים</h2>
+        <h2><i class="fa-solid fa-table"></i> טבלת נתונים</h2>
         <div class="table-container">
           <table>
             <thead>
-              <tr><th>פריט</th><th>סטטוס</th><th>זמן</th></tr>
+              <tr>
+                <th>מספר</th>
+                <th>סטטוס</th>
+                <th>שעה</th>
+              </tr>
             </thead>
             <tbody>
-              <tr><td>הזמנה 001</td><td>פעילה</td><td>12:30</td></tr>
-              <tr><td>הזמנה 002</td><td>בוצעה</td><td>09:45</td></tr>
-              <tr><td>הזמנה 003</td><td>בדרך</td><td>14:10</td></tr>
+              <tr><td>001</td><td><span class="badge success">פעילה</span></td><td>12:30</td></tr>
+              <tr><td>002</td><td><span class="badge warning">ממתינה</span></td><td>09:45</td></tr>
+              <tr><td>003</td><td><span class="badge info">בדרך</span></td><td>14:10</td></tr>
+              <tr><td>004</td><td><span class="badge danger">בוטלה</span></td><td>16:00</td></tr>
             </tbody>
           </table>
         </div>
       </section>
 
+      <!-- כרטיסי מדדים -->
       <section class="info-cards">
-        <div class="info-card">מסגרת 1</div>
-        <div class="info-card">מסגרת 2</div>
+        <div class="info-card">
+          <i class="fa-solid fa-user-check"></i>
+          <p>לקוחות פעילים</p>
+          <span>14</span>
+        </div>
+        <div class="info-card">
+          <i class="fa-solid fa-truck"></i>
+          <p>הזמנות פתוחות</p>
+          <span>9</span>
+        </div>
+        <div class="info-card">
+          <i class="fa-solid fa-box"></i>
+          <p>מכולות בשימוש</p>
+          <span>14</span>
+        </div>
       </section>
+
     </main>
   </div>
 
   <!-- כפתור גלילה למעלה -->
-  <button id="scroll-top-btn" class="scroll-top-btn" title="חזרה למעלה">↑</button>
+  <button id="scroll-top-btn" class="scroll-top-btn" title="חזרה למעלה">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
 
   <script>
     // JS לכפתור גלילה למעלה
