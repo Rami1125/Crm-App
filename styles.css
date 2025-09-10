@@ -1,234 +1,286 @@
-/* * styles.css
- * This file contains all the styling for the CRM application.
- * It uses CSS variables for easy theming and is built with a mobile-first approach.
-*/
+/*
+ * @file admin.styles.css
+ * @description Premium styling for the Admin Dashboard.
+ * Includes a color scheme, responsive layout, and custom components.
+ */
 
-/* =:root {
-  --bg: #f4f6f9;
-  --card-bg: #fff;
-  --primary: #0d6efd;
-  --success: #28a745;
-  --danger: #dc3545;
-  --warning: #ffc107;
-  --info: #17a2b8;
-  --shadow: 0 6px 20px rgba(0,0,0,0.08);
-  --radius: 12px;
-  --font: 'Assistant', sans-serif;
+/* --- 1. CSS Variables (Design Tokens) --- */
+:root {
+    --primary: #0d6efd;
+    --primary-light: #e7f1ff;
+    --primary-dark: #0b5ed7;
+    --secondary: #6c757d;
+    --success: #198754;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --light: #f8f9fa;
+    --bg-light: #f0f2f5;
+    --card-bg: #ffffff;
+    --text-color: #212529;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --radius: 12px;
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+    --font-main: 'Assistant', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* --- 2. General & Layout Styling --- */
 body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: #222;
-  margin: 0;
-  direction: rtl;
-}
-
-.app-frame {
-  max-width: 480px;
-  margin: auto;
-  padding: 12px;
-  min-height: 100vh;
-}
-
-/* Header */
-.app-header {
-  text-align: center;
-  padding: 14px;
-  background: var(--primary);
-  color: #fff;
-  border-radius: var(--radius);
-  margin-bottom: 16px;
-  box-shadow: var(--shadow);
-}
-.app-header h1 {
-  font-size: 20px;
-  margin-bottom: 6px;
-}
-.app-header p {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-/* Data card */
-.data-card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 14px;
-  box-shadow: var(--shadow);
-}
-.data-card h2 {
-  margin-bottom: 12px;
-  font-size: 18px;
-  color: var(--primary);
-}
-
-/* Table */
-.table-container {
-  overflow-x: auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  padding: 10px;
-  text-align: center;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-}
-thead th {
-  background: var(--primary);
-  color: #fff;
-}
-
-/* Badges */
-.badge {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  color: #fff;
-}
-.success { background: var(--success); }
-.danger { background: var(--danger); }
-.warning { background: var(--warning); color: #000; }
-.info { background: var(--info); }
-
-/* Action buttons */
-.action-btn {
-  border: none;
-  border-radius: 20px;
-  padding: 6px 12px;
-  margin: 2px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-  transition: transform 0.2s;
-}
-.action-btn i {
-  margin-left: 4px;
-}
-.action-btn:hover {
-  transform: scale(1.05);
-}
-.swap {
-  background: var(--info);
-  color: #fff;
-}
-.remove {
-  background: var(--danger);
-  color: #fff;
-}
-body {
-    font-family: 'Arial', sans-serif;
-    background: #ffffff;
-    color: #fff;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* צל קל */
-    border-radius: 12px;
+    font-family: var(--font-main);
+    background-color: var(--bg-light);
     margin: 0;
-    padding: 0;
+    padding: 25px;
+    color: var(--text-color);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.app-container {
-    max-width: 480px;
-    margin: 20px auto;
-    padding: 10px;
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
 }
 
 header h1 {
-    text-align: center;
-    color: #0ff;
-    text-shadow: 0 0 10px #0ff;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 2.2rem;
+    margin: 0;
 }
 
-.order-box {
-    background: #111;
-    border: 2px solid #0ff;
-    border-radius: 12px;
-    padding: 15px;
+header p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-top: 5px;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 2.5fr 1fr;
+    gap: 25px;
+    align-items: flex-start;
+}
+
+/* --- 3. Component Styling --- */
+.card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 25px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.card-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
     margin-bottom: 20px;
 }
 
-.order-box h2 {
-    color: #0ff;
-    margin-bottom: 10px;
+.card-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
 }
 
-.order-info {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.table-responsive {
+    overflow-x: auto;
 }
 
-.progress-container {
-    width: 100%;
-    height: 15px;
-    background: #222;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    width: 0;
-    background: linear-gradient(90deg, #0ff, #0ff, #0ff);
-    box-shadow: 0 0 10px #0ff;
-    transition: width 0.2s linear;
-}
-
-.order-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-
-.action-btn {
-    flex: 1;
-    padding: 15px 0;
-    font-size: 16px;
-    font-weight: bold;
-    color: #0ff;
-    background: #111;
-    border: 2px solid #0ff;
-    border-radius: 12px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.3s ease;
-}
-
-.action-btn:hover {
-    background: #0ff;
-    color: #111;
-    box-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
-}
-
-table {
+.clients-table {
     width: 100%;
     border-collapse: collapse;
+    text-align: right;
+    font-size: 0.95rem;
 }
 
-th, td {
-    padding: 8px;
-    text-align: center;
-    border: 1px solid #0ff;
+.clients-table th, .clients-table td {
+    padding: 14px 15px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
 }
 
-th {
-    background: #111;
-    color: #0ff;
+.clients-table th {
+    font-weight: 700;
+    background-color: var(--light);
+    color: var(--primary);
 }
 
-.scroll-btn {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    padding: 10px 15px;
-    font-size: 18px;
-    border-radius: 50%;
-    background: #0ff;
-    color: #111;
+.clients-table tbody tr:hover {
+    background-color: var(--primary-light);
+}
+
+.btn {
     border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+    font-weight: 700;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-family: var(--font-main);
 }
+
+.btn.primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn.primary:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+}
+
+.requests-log {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+.requests-log li {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: background-color 0.2s;
+}
+
+.requests-log li:hover {
+    background-color: var(--light);
+}
+
+.requests-log li:last-child {
+    border-bottom: none;
+}
+
+.requests-log .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+.requests-log .icon.swap { background-color: var(--warning); }
+.requests-log .icon.removal { background-color: var(--danger); }
+
+.requests-log .content strong {
+    display: block;
+    color: var(--text-color);
+}
+.requests-log .content .meta {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.placeholder-row {
+    color: var(--text-muted);
+    text-align: center;
+    font-style: italic;
+    padding: 30px;
+}
+.placeholder-row td {
+    padding: 30px;
+}
+
+/* --- 4. Modal Styling --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0,0,0,0.6);
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.modal-overlay.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    transform: scale(0.95);
+    transition: transform 0.3s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--secondary);
+    transition: transform 0.2s;
+}
+.modal-close:hover {
+    transform: scale(1.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: var(--font-main);
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* --- 5. Responsive Design --- */
+@media (max-width: 992px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+    body {
+        padding: 15px;
+    }
+}
+
