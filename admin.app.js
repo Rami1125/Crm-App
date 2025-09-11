@@ -5,7 +5,7 @@
  */
 
 // ⭐ ACTION REQUIRED: Replace with the new URL from your latest deployment.
-const API_URL = 'https://script.google.com/macros/s/AKfycbw7eJ5au7NlrKZBsSyJAMEcIuU4ipJ02vuVBPHDU4yM7IUSSEhZF1XfrtaS535Qnceo/exec'; 
+const API_URL = 'https://script.google.com/macros/s/AKfycbz5zkASUR1Ye1ZzYvPDvq4VhZegvZHzG5vdczLEaahcw_NDO2D9vb_4sGVYFrjrHzc/exec'; 
 
 // --- DOM Elements ---
 const clientsTableBody = document.getElementById('clients-table-body');
