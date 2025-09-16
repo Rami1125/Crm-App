@@ -4,80 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לוח בקרה למנהל - ח.סבן</title>
-    <!-- Chosen Palette: Cool & Calm Blue -->
-    <!-- Application Structure Plan: A single-page dashboard for order managers. The main view uses tabs to switch between 'Live Orders' and 'Statistics'. The 'Live Orders' tab displays a real-time, searchable list of all open container orders. Clicking an order opens a modal for detailed actions: updating the status (which writes to the Google Sheet) and sending a direct push notification to the client via Firebase. The 'Statistics' tab provides visual summaries (e.g., orders by status) using Chart.js. This structure is chosen for efficiency, allowing managers to quickly assess the current situation and act on specific orders from a single screen. -->
-    <!-- Visualization & Content Choices: Report Info: Live order list -> Goal: Organize/Inform -> Viz: Interactive HTML table/list -> Interaction: Search, click to open details modal -> Justification: Allows managers to quickly find and manage specific orders. Report Info: Order statuses -> Goal: Inform -> Viz: Donut Chart (Chart.js/Canvas) -> Interaction: Hover for details -> Justification: Provides a quick visual summary of the overall workload and order distribution. Report Info: Manager actions -> Goal: Task Completion -> Viz: Modal with forms (dropdown for status, text input for message) -> Interaction: Form submission -> Justification: Centralizes all actions for a specific order, streamlining the manager's workflow. Library: Chart.js for visualizations. Method: Data is fetched from a Google Apps Script backend connected to a Google Sheet. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; }
-        .tab-active { border-color: #3b82f6; color: #3b82f6; background-color: #eff6ff; }
-        .modal-backdrop { background-color: rgba(0,0,0,0.5); }
-        .status-pill { padding: 4px 12px; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; text-transform: capitalize; }
-        .status-פתוחה { background-color: #dbeafe; color: #1e40af; }
-        .status-סגורה { background-color: #d1fae5; color: #065f46; }
-        .status-הצבה { background-color: #fef3c7; color: #92400e; }
-        .status-החלפה { background-color: #e0e7ff; color: #3730a3; }
-        .status-פינוי { background-color: #fee2e2; color: #991b1b; }
-        .status-default { background-color: #e5e7eb; color: #374151; }
-        .chart-container { position: relative; width: 100%; max-width: 400px; margin: auto; height: 300px; max-height: 400px; }
-        @media (min-width: 768px) { .chart-container { height: 400px; } }
+        body { font-family: 'Assistant', sans-serif; direction: rtl; }
+        .modal-bg { background-color: rgba(0,0,0,0.5); }
+        .status-badge { padding: 2px 8px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; color: white; }
+        .status-פתוחה { background-color: #3b82f6; }
+        .status-הצבה { background-color: #f59e0b; }
+        .status-החלפה { background-color: #84cc16; }
+        .status-פינוי { background-color: #ef4444; }
+        .status-סגורה { background-color: #6b7280; }
+        .status-default { background-color: #a8a29e; }
+        .chart-container { position: relative; height: 300px; width: 100%; max-width: 400px; margin: auto; }
     </style>
 </head>
-<body class="antialiased text-gray-800">
+<body class="bg-gray-100 text-gray-800">
 
-    <div id="loading-spinner" class="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
+    <!-- Main Container -->
+    <div id="app-container" class="container mx-auto p-4 max-w-7xl">
 
-    <div class="container mx-auto p-4 md:p-6">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b">
-            <h1 class="text-3xl font-bold text-gray-700">לוח בקרה למנהל</h1>
-            <div class="flex items-center gap-4 mt-4 md:mt-0">
-                <div class="text-right">
-                    <p class="text-sm text-gray-500">הזמנות פתוחות</p>
-                    <p id="open-orders-count" class="text-2xl font-bold text-blue-600">0</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-sm text-gray-500">סך הכל הזמנות</p>
-                    <p id="total-orders-count" class="text-2xl font-bold text-gray-600">0</p>
-                </div>
-            </div>
+        <!-- Header -->
+        <header class="bg-white shadow-md rounded-lg p-4 mb-6 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-700">לוח בקרה למנהל</h1>
+            <div id="dashboard-counts" class="flex gap-4"></div>
         </header>
-
-        <div class="mb-6">
-            <div class="flex border-b border-gray-200">
-                <button data-tab="orders" class="tab-button tab-active py-2 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition">ניהול הזמנות</button>
-                <button data-tab="stats" class="tab-button py-2 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition">סטטיסטיקה</button>
-            </div>
+        
+        <!-- Status / Error Display -->
+        <div id="status-display" class="text-center p-10 bg-white rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-600">טוען נתונים, אנא המתן...</h2>
+            <p id="error-details" class="text-red-500 mt-2"></p>
         </div>
 
-        <main id="main-content">
-            <div id="orders-tab" class="tab-content">
-                 <p class="mb-4 text-gray-600">
-                    ברוכים הבאים ללוח הבקרה. מכאן ניתן לנהל את כל ההזמנות הפעילות, לעדכן את הסטטוס שלהן בזמן אמת ולתקשר עם הלקוחות. השתמשו בחיפוש כדי לאתר הזמנה ספציפית, ולחצו על כל הזמנה כדי לפתוח את אפשרויות הניהול.
-                </p>
-                <div class="mb-4">
-                    <input type="text" id="search-input" placeholder="חפש לפי שם לקוח, כתובת, תעודה..." class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div id="orders-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                </div>
+        <!-- Main Content (Hidden by default) -->
+        <main id="main-content" class="hidden">
+            <!-- Tabs -->
+            <div class="mb-4 border-b border-gray-200">
+                <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="tabs-container" role="tablist">
+                    <li role="presentation">
+                        <button class="inline-block p-4 border-b-2 rounded-t-lg" data-tab="orders">ניהול הזמנות</button>
+                    </li>
+                    <li role="presentation">
+                        <button class="inline-block p-4 border-b-2 rounded-t-lg" data-tab="stats">סטטיסטיקה</button>
+                    </li>
+                </ul>
             </div>
-            <div id="stats-tab" class="tab-content hidden">
-                 <p class="mb-4 text-gray-600">
-                    חלק זה מספק מבט חזותי על פיזור ההזמנות. התרשימים מאפשרים להבין במהירות את מצב העבודה הנוכחי, כמו למשל כמות ההזמנות מכל סוג או התפלגות ההזמנות בין הסוכנים השונים. המידע מתעדכן אוטומטית עם הנתונים מהמערכת.
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                    <div class="bg-white p-6 rounded-xl shadow-md">
-                        <h3 class="text-xl font-bold text-center mb-4">הזמנות לפי סטטוס</h3>
+
+            <!-- Tab Content -->
+            <div id="tabs-content">
+                <!-- Orders Tab -->
+                <div id="orders-tab" class="hidden tab-panel bg-white p-4 rounded-lg shadow-md">
+                    <div class="mb-4">
+                        <input type="text" id="search-input" placeholder="חפש לפי שם לקוח, תעודה, סטטוס..." class="w-full p-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">שם לקוח</th>
+                                    <th scope="col" class="px-6 py-3">תעודה</th>
+                                    <th scope="col" class="px-6 py-3">סוג פעולה</th>
+                                    <th scope="col" class="px-6 py-3">סטטוס</th>
+                                    <th scope="col" class="px-6 py-3">פעולות</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body">
+                                <!-- Rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Stats Tab -->
+                <div id="stats-tab" class="hidden tab-panel bg-white p-4 rounded-lg shadow-md">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="chart-container">
                             <canvas id="statusChart"></canvas>
                         </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md">
-                         <h3 class="text-xl font-bold text-center mb-4">הזמנות לפי סוג פעולה</h3>
                         <div class="chart-container">
                             <canvas id="actionTypeChart"></canvas>
                         </div>
@@ -87,42 +90,277 @@
         </main>
     </div>
 
-    <div id="order-modal" class="fixed inset-0 z-40 hidden items-center justify-center modal-backdrop">
-        <div class="bg-white rounded-xl shadow-2xl w-11/12 md:w-2/3 lg:w-1/2 max-w-2xl transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
-            <div class="p-6 border-b flex justify-between items-center">
-                <h2 class="text-2xl font-bold">פרטי הזמנה</h2>
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 modal-bg flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modal-title" class="text-xl font-bold">פרטי הזמנה</h2>
                 <button id="close-modal" class="text-gray-500 hover:text-gray-800">&times;</button>
             </div>
-            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-                <div id="modal-details"></div>
-                <hr>
-                <div class="space-y-3">
-                    <h3 class="text-lg font-semibold">עדכון סטטוס</h3>
-                    <select id="status-select" class="w-full p-2 border border-gray-300 rounded-lg">
-                        <option value="פתוחה">פתוחה</option>
-                        <option value="הצבה">הצבה</option>
-                        <option value="החלפה">החלפה</option>
-                        <option value="פינוי">פינוי</option>
-                        <option value="סגורה">סגורה</option>
-                    </select>
-                    <button id="update-status-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">עדכן סטטוס</button>
-                </div>
-                <hr>
-                <div class="space-y-3">
-                    <h3 class="text-lg font-semibold">שלח הודעה ללקוח</h3>
-                    <textarea id="notification-message" rows="3" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="ההזמנה בדרך אליך..."></textarea>
-                    <button id="send-notification-btn" class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition">שלח התראה</button>
-                </div>
-                 <div id="modal-feedback" class="text-center font-semibold"></div>
+            <div id="modal-content" class="mb-4 space-y-2"></div>
+            <div class="flex items-center gap-4 mb-4">
+                <select id="status-select" class="p-2 border rounded-lg flex-grow"></select>
+                <button id="update-status-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">עדכן סטטוס</button>
+            </div>
+            <div class="space-y-2">
+                <textarea id="notification-message" placeholder="כתוב הודעה ללקוח..." class="w-full p-2 border rounded-lg" rows="3"></textarea>
+                <button id="send-notification-btn" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">שלח התראה ללקוח</button>
+            </div>
+            <div id="modal-feedback" class="text-center font-semibold mt-4"></div>
         </div>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // UPDATED: Using the new deployment URL you provided.
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKKoSTy50_PiUA6sc6FwFR4X8aJhWETvzaC5ick2v1Rs0LIFRs2Uj-bGKWYDrr4odqiA/exec";
         
         let allOrders = [];
         let statusChart = null;
-// ... existing code ... -->
+        let actionTypeChart = null;
+        
+        const dom = {
+            statusDisplay: document.getElementById('status-display'),
+            errorDetails: document.getElementById('error-details'),
+            mainContent: document.getElementById('main-content'),
+            dashboardCounts: document.getElementById('dashboard-counts'),
+            searchInput: document.getElementById('search-input'),
+            ordersTableBody: document.getElementById('orders-table-body'),
+            modal: document.getElementById('modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalContent: document.getElementById('modal-content'),
+            closeModal: document.getElementById('close-modal'),
+            statusSelect: document.getElementById('status-select'),
+            updateStatusBtn: document.getElementById('update-status-btn'),
+            notificationMessage: document.getElementById('notification-message'),
+            sendNotificationBtn: document.getElementById('send-notification-btn'),
+            modalFeedback: document.getElementById('modal-feedback'),
+            tabsContainer: document.getElementById('tabs-container'),
+            ordersTab: document.getElementById('orders-tab'),
+            statsTab: document.getElementById('stats-tab')
+        };
+        
+        async function apiCall(action, payload = {}) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    credentials: 'omit',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action, ...payload }),
+                    redirect: 'follow'
+                });
+                if (!response.ok) throw new Error(`שגיאת רשת: ${response.statusText} (${response.status})`);
+                const result = await response.json();
+                if (result.status === 'error') throw new Error(`שגיאה מהשרת: ${result.message}`);
+                return result;
+            } catch (error) {
+                console.error('API Call Error:', error);
+                throw error; // Re-throw the error to be caught by the caller
+            }
+        }
+
+        function renderOrders(orders) {
+            dom.ordersTableBody.innerHTML = '';
+            if (!orders || orders.length === 0) {
+                dom.ordersTableBody.innerHTML = '<tr><td colspan="5" class="text-center p-4">לא נמצאו הזמנות.</td></tr>';
+                return;
+            }
+            orders.forEach(order => {
+                const status = order['סטטוס'] || 'default';
+                const row = `
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${order['שם לקוח']}</td>
+                        <td class="px-6 py-4">${order['תעודה']}</td>
+                        <td class="px-6 py-4">${order['סוג פעולה']}</td>
+                        <td class="px-6 py-4"><span class="status-badge status-${status.replace(/\s+/g, '')}">${status}</span></td>
+                        <td class="px-6 py-4"><button class="view-details-btn font-medium text-blue-600 hover:underline" data-order-id="${order['תעודה']}">פרטים</button></td>
+                    </tr>
+                `;
+                dom.ordersTableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+        
+        function updateDashboardCounts() {
+            const statusCounts = allOrders.reduce((acc, order) => {
+                const status = order['סטטוס'] || 'לא ידוע';
+                acc[status] = (acc[status] || 0) + 1;
+                return acc;
+            }, {});
+            
+            dom.dashboardCounts.innerHTML = Object.entries(statusCounts)
+                .map(([status, count]) => `<div class="text-center"><div class="font-bold text-lg">${count}</div><div class="text-xs text-gray-500">${status}</div></div>`)
+                .join('');
+        }
+        
+        function openModal(order) {
+            dom.modalTitle.textContent = `פרטי הזמנה: ${order['תעודה']}`;
+            dom.modalContent.innerHTML = `
+                <p><strong>לקוח:</strong> ${order['שם לקוח']} (${order['מספר לקוח']})</p>
+                <p><strong>כתובת:</strong> ${order['כתובת'] || 'לא צוינה'}</p>
+                <p><strong>סוכן:</strong> ${order['שם סוכן'] || 'לא צוין'}</p>
+                <p><strong>הערות:</strong> ${order['הערות'] || 'אין'}</p>
+            `;
+            
+            const statuses = [...new Set(allOrders.map(o => o['סטטוס']))].filter(Boolean);
+            dom.statusSelect.innerHTML = statuses.map(s => `<option value="${s}">${s}</option>`).join('');
+            dom.statusSelect.value = order['סטטוס'];
+            
+            dom.updateStatusBtn.dataset.orderId = order['תעודה'];
+            dom.sendNotificationBtn.dataset.clientId = order['מספר לקוח'];
+            dom.sendNotificationBtn.dataset.orderId = order['תעודה'];
+            dom.notificationMessage.value = `שלום, עדכון לגבי הזמנה מספר ${order['תעודה']}: `;
+            dom.modalFeedback.textContent = '';
+            
+            dom.modal.classList.remove('hidden');
+        }
+
+        function filterOrders() {
+            const query = dom.searchInput.value.toLowerCase();
+            const filteredOrders = allOrders.filter(order => {
+                return Object.values(order).some(val => 
+                    String(val).toLowerCase().includes(query)
+                );
+            });
+            renderOrders(filteredOrders);
+        }
+
+        async function handleUpdateStatus() {
+            const orderId = dom.updateStatusBtn.dataset.orderId;
+            const newStatus = dom.statusSelect.value;
+            dom.modalFeedback.textContent = 'מעדכן...';
+            try {
+                await apiCall('updateOrderStatus', { orderId, newStatus });
+                dom.modalFeedback.textContent = 'סטטוס עודכן בהצלחה!';
+                const orderToUpdate = allOrders.find(o => o['תעודה'] == orderId);
+                if (orderToUpdate) orderToUpdate['סטטוס'] = newStatus;
+                renderOrders(allOrders);
+                updateDashboardCounts();
+                prepareChartData();
+                setTimeout(() => { dom.modalFeedback.textContent = ''; }, 2000);
+            } catch(error) {
+                dom.modalFeedback.textContent = `שגיאה בעדכון: ${error.message}`;
+            }
+        }
+        
+        async function handleSendNotification() {
+            const clientId = dom.sendNotificationBtn.dataset.clientId;
+            const orderId = dom.sendNotificationBtn.dataset.orderId;
+            const message = dom.notificationMessage.value.trim();
+
+            if (!clientId) {
+                dom.modalFeedback.textContent = 'שגיאה: לא נמצא מזהה לקוח.';
+                return;
+            }
+            if (!message) {
+                 dom.modalFeedback.textContent = 'יש להזין תוכן להודעה.';
+                 return;
+            }
+            
+            dom.modalFeedback.textContent = 'שולח...';
+             try {
+                await apiCall('sendNotificationToClient', { clientId, title: `עדכון להזמנה ${orderId}`, body: message });
+                dom.modalFeedback.textContent = 'ההתראה נשלחה בהצלחה!';
+                setTimeout(() => { dom.modalFeedback.textContent = ''; }, 2000);
+            } catch(error) {
+                dom.modalFeedback.textContent = `שגיאה בשליחה: ${error.message}`;
+            }
+        }
+        
+        function prepareChartData() {
+            const statusData = allOrders.reduce((acc, order) => {
+                const status = order['סטטוס'] || 'לא ידוע';
+                acc[status] = (acc[status] || 0) + 1;
+                return acc;
+            }, {});
+            
+            const actionTypeData = allOrders.reduce((acc, order) => {
+                const type = order['סוג פעולה'] || 'לא ידוע';
+                acc[type] = (acc[type] || 0) + 1;
+                return acc;
+            }, {});
+
+            createOrUpdateChart(statusChart, 'statusChart', 'הזמנות לפי סטטוס', statusData, 'pie');
+            createOrUpdateChart(actionTypeChart, 'actionTypeChart', 'הזמנות לפי סוג פעולה', actionTypeData, 'bar');
+        }
+
+        function createOrUpdateChart(chartInstance, canvasId, label, data, type) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const chartData = {
+                labels: Object.keys(data),
+                datasets: [{
+                    label: label,
+                    data: Object.values(data),
+                    backgroundColor: ['#3b82f6', '#f59e0b', '#84cc16', '#ef4444', '#6b7280', '#a8a29e', '#10b981'],
+                    borderWidth: 1
+                }]
+            };
+
+            if (chartInstance) {
+                chartInstance.data = chartData;
+                chartInstance.update();
+            } else {
+                 if(canvasId === 'statusChart') {
+                    statusChart = new Chart(ctx, { type: type, data: chartData, options: { responsive: true, maintainAspectRatio: false } });
+                 } else {
+                    actionTypeChart = new Chart(ctx, { type: type, data: chartData, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' } });
+                 }
+            }
+        }
+
+        function handleTabClick(e) {
+            const clickedTab = e.target.closest('button');
+            if (!clickedTab) return;
+
+            dom.tabsContainer.querySelectorAll('button').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-blue-600');
+                btn.classList.add('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+            });
+            
+            clickedTab.classList.add('text-blue-600', 'border-blue-600');
+            clickedTab.classList.remove('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+            
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+            document.getElementById(`${clickedTab.dataset.tab}-tab`).classList.remove('hidden');
+        }
+
+        async function init() {
+            try {
+                const result = await apiCall('getAdminData');
+                if (result && result.data && Array.isArray(result.data.orders)) {
+                    allOrders = result.data.orders;
+                    dom.statusDisplay.classList.add('hidden');
+                    dom.mainContent.classList.remove('hidden');
+                    
+                    renderOrders(allOrders);
+                    updateDashboardCounts();
+                    prepareChartData();
+                    handleTabClick({ target: dom.tabsContainer.querySelector('button[data-tab="orders"]') });
+                } else {
+                     throw new Error("מבנה הנתונים שהתקבל מהשרת אינו תקין.");
+                }
+            } catch (error) {
+                dom.statusDisplay.querySelector('h2').textContent = 'אירעה שגיאה בטעינת הנתונים';
+                dom.errorDetails.textContent = `פרטים: ${error.message}. ודא שקובץ ה-Google Sheet מוגדר נכון ושאין שגיאות ב-Apps Script.`;
+            }
+        }
+        
+        // --- Event Listeners ---
+        dom.searchInput.addEventListener('input', filterOrders);
+        dom.ordersTableBody.addEventListener('click', e => {
+            if (e.target.classList.contains('view-details-btn')) {
+                const orderId = e.target.dataset.orderId;
+                const order = allOrders.find(o => o['תעודה'] == orderId);
+                if (order) openModal(order);
+            }
+        });
+        dom.closeModal.addEventListener('click', () => dom.modal.classList.add('hidden'));
+        dom.updateStatusBtn.addEventListener('click', handleUpdateStatus);
+        dom.sendNotificationBtn.addEventListener('click', handleSendNotification);
+        dom.tabsContainer.addEventListener('click', handleTabClick);
+        
+        init();
+    });
+    </script>
+</body>
+</html>
 
