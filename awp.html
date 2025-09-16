@@ -112,7 +112,8 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKKoSTy50_PiUA6sc6FwFR4X8aJhWETvzaC5ick2v1Rs0LIFRs2Uj-bGKWYDrr4odqiA/exec";
+        // Updated with your new script URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCLiG9v_vsDQ5paLbKIxVPpgMDbXcq99iWjBNOlCSVoqxFpD68jtV3ruM-srdd3xbbEQ/exec";
         
         let allOrders = [];
         let statusChart = null;
@@ -145,17 +146,17 @@
                     method: 'POST',
                     mode: 'cors',
                     credentials: 'omit',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action, ...payload }),
                     redirect: 'follow'
                 });
-                if (!response.ok) throw new Error(`שגיאת רשת: ${response.statusText} (${response.status})`);
+                if (!response.ok) throw new Error(`Network error: ${response.statusText} (${response.status})`);
                 const result = await response.json();
-                if (result.status === 'error') throw new Error(`שגיאה מהשרת: ${result.message}`);
+                if (result.status === 'error') throw new Error(`Server error: ${result.message}`);
                 return result;
             } catch (error) {
                 console.error('API Call Error:', error);
-                throw error; // Re-throw the error to be caught by the caller
+                throw error;
             }
         }
 
@@ -340,7 +341,7 @@
                 }
             } catch (error) {
                 dom.statusDisplay.querySelector('h2').textContent = 'אירעה שגיאה בטעינת הנתונים';
-                dom.errorDetails.textContent = `פרטים: ${error.message}. ודא שקובץ ה-Google Sheet מוגדר נכון ושאין שגיאות ב-Apps Script.`;
+                dom.errorDetails.textContent = `פרטים: ${error.message}. ודא שהסקריפט פורסם מחדש עם הגרסה האחרונה.`;
             }
         }
         
@@ -363,4 +364,3 @@
     </script>
 </body>
 </html>
-
