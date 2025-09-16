@@ -2,222 +2,198 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>אזור אישי - ח.סבן</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="https://i.postimg.cc/2SbDgD1B/1.png">
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>לוח בקרה למנהל - ח.סבן</title>
+    <!-- Chosen Palette: Cool & Calm Blue -->
+    <!-- Application Structure Plan: A single-page dashboard for order managers. The main view uses tabs to switch between 'Live Orders' and 'Statistics'. The 'Live Orders' tab displays a real-time, searchable list of all open container orders. Clicking an order opens a modal for detailed actions: updating the status (which writes to the Google Sheet) and sending a direct push notification to the client via Firebase. The 'Statistics' tab provides visual summaries (e.g., orders by status) using Chart.js. This structure is chosen for efficiency, allowing managers to quickly assess the current situation and act on specific orders from a single screen. -->
+    <!-- Visualization & Content Choices: Report Info: Live order list -> Goal: Organize/Inform -> Viz: Interactive HTML table/list -> Interaction: Search, click to open details modal -> Justification: Allows managers to quickly find and manage specific orders. Report Info: Order statuses -> Goal: Inform -> Viz: Donut Chart (Chart.js/Canvas) -> Interaction: Hover for details -> Justification: Provides a quick visual summary of the overall workload and order distribution. Report Info: Manager actions -> Goal: Task Completion -> Viz: Modal with forms (dropdown for status, text input for message) -> Interaction: Form submission -> Justification: Centralizes all actions for a specific order, streamlining the manager's workflow. Library: Chart.js for visualizations. Method: Data is fetched from a Google Apps Script backend connected to a Google Sheet. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --brand-primary: #0a67ad; --brand-secondary: #004272;
-            --background-light: #f4f7fa; --background-white: #ffffff;
-            --text-primary: #1a253c; --text-secondary: #5a647b;
-            --border-color: #e8edf3; --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.06);
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        body { font-family: 'Assistant', sans-serif; background-color: var(--background-light); margin: 0; color: var(--text-primary); }
-        
-        /* Login Page */
-        #page-login { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: var(--brand-secondary); }
-        .login-card { background: var(--background-white); padding: 40px; border-radius: 15px; text-align: center; width: 90%; max-width: 400px; animation: fadeIn 0.5s; }
-        .login-logo { width: 100px; margin-bottom: 20px; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 20px; }
-        .btn-primary { background: var(--brand-primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
-        
-        /* App Structure */
-        .app-container { display: flex; flex-direction: column; height: 100vh; }
-        .page { display: none; padding: 20px; animation: fadeIn 0.4s; }
-        .page.active { display: block; }
-        .app-header { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 60px; background: var(--background-white); box-shadow: var(--shadow-light); }
-        .user-info { display: flex; align-items: center; gap: 12px; font-weight: 600; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-        .logout-btn { background: none; border: none; font-size: 20px; color: var(--text-secondary); cursor: pointer; }
-        .splash-screen { position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; background-color: var(--brand-secondary); z-index: 9999; transition: opacity 0.5s; }
-        .splash-screen.hidden { opacity: 0; pointer-events: none; }
-        
-        /* Project Filter */
-        .filter-container { margin-bottom: 20px; }
-        .filter-container select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 16px; }
-
-        /* Order Card */
-        .order-card { background:white; padding:15px; border-radius:10px; margin-bottom:10px; box-shadow: var(--shadow-light); border-left: 5px solid var(--brand-primary); }
-        .order-card strong { font-size: 1.1em; }
-        .order-card .project-name { font-size: 0.9em; color: var(--text-secondary); margin-top: 5px; }
+        body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; }
+        .tab-active { border-color: #3b82f6; color: #3b82f6; background-color: #eff6ff; }
+        .modal-backdrop { background-color: rgba(0,0,0,0.5); }
+        .status-pill { padding: 4px 12px; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; text-transform: capitalize; }
+        .status-פתוחה { background-color: #dbeafe; color: #1e40af; }
+        .status-סגורה { background-color: #d1fae5; color: #065f46; }
+        .status-הצבה { background-color: #fef3c7; color: #92400e; }
+        .status-החלפה { background-color: #e0e7ff; color: #3730a3; }
+        .status-פינוי { background-color: #fee2e2; color: #991b1b; }
+        .status-default { background-color: #e5e7eb; color: #374151; }
+        .chart-container { position: relative; width: 100%; max-width: 400px; margin: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 400px; } }
     </style>
 </head>
-<body>
+<body class="antialiased text-gray-800">
 
-    <div id="page-login" class="page active">
-        <div class="login-card">
-            <img src="https://i.postimg.cc/2SbDgD1B/1.png" alt="לוגו" class="login-logo">
-            <h2>אזור אישי</h2>
-            <form id="login-form">
-                <div class="input-group">
-                    <input type="text" id="client-id" placeholder="הזן מספר לקוח ראשי" required>
-                </div>
-                <button type="submit" class="btn-primary">התחבר</button>
-            </form>
-        </div>
+    <div id="loading-spinner" class="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
     </div>
-    
-    <div id="app-content" style="display: none;">
-        <div class="app-container">
-            <header class="app-header">
-                <div class="user-info">
-                    <img id="user-avatar" src="" alt="פרופיל" class="user-avatar">
-                    <span id="user-name"></span>
+
+    <div class="container mx-auto p-4 md:p-6">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b">
+            <h1 class="text-3xl font-bold text-gray-700">לוח בקרה למנהל</h1>
+            <div class="flex items-center gap-4 mt-4 md:mt-0">
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">הזמנות פתוחות</p>
+                    <p id="open-orders-count" class="text-2xl font-bold text-blue-600">0</p>
                 </div>
-                <button class="logout-btn" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
-            </header>
-            <main>
-                <div id="page-main" class="page">
-                    <div class="filter-container">
-                        <label for="project-filter" style="font-weight:600; margin-bottom:8px; display:block;">הצג פרויקט:</label>
-                        <select id="project-filter"></select>
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">סך הכל הזמנות</p>
+                    <p id="total-orders-count" class="text-2xl font-bold text-gray-600">0</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="mb-6">
+            <div class="flex border-b border-gray-200">
+                <button data-tab="orders" class="tab-button tab-active py-2 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition">ניהול הזמנות</button>
+                <button data-tab="stats" class="tab-button py-2 px-6 font-semibold text-gray-500 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition">סטטיסטיקה</button>
+            </div>
+        </div>
+
+        <main id="main-content">
+            <div id="orders-tab" class="tab-content">
+                 <p class="mb-4 text-gray-600">
+                    ברוכים הבאים ללוח הבקרה. מכאן ניתן לנהל את כל ההזמנות הפעילות, לעדכן את הסטטוס שלהן בזמן אמת ולתקשר עם הלקוחות. השתמשו בחיפוש כדי לאתר הזמנה ספציפית, ולחצו על כל הזמנה כדי לפתוח את אפשרויות הניהול.
+                </p>
+                <div class="mb-4">
+                    <input type="text" id="search-input" placeholder="חפש לפי שם לקוח, כתובת, תעודה..." class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div id="orders-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+            </div>
+            <div id="stats-tab" class="tab-content hidden">
+                 <p class="mb-4 text-gray-600">
+                    חלק זה מספק מבט חזותי על פיזור ההזמנות. התרשימים מאפשרים להבין במהירות את מצב העבודה הנוכחי, כמו למשל כמות ההזמנות מכל סוג או התפלגות ההזמנות בין הסוכנים השונים. המידע מתעדכן אוטומטית עם הנתונים מהמערכת.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold text-center mb-4">הזמנות לפי סטטוס</h3>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
                     </div>
-                    <div id="orders-list"></div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                         <h3 class="text-xl font-bold text-center mb-4">הזמנות לפי סוג פעולה</h3>
+                        <div class="chart-container">
+                            <canvas id="actionTypeChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-            </main>
+            </div>
+        </main>
+    </div>
+
+    <div id="order-modal" class="fixed inset-0 z-40 hidden items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-xl shadow-2xl w-11/12 md:w-2/3 lg:w-1/2 max-w-2xl transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 class="text-2xl font-bold">פרטי הזמנה</h2>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div id="modal-details"></div>
+                <hr>
+                <div class="space-y-3">
+                    <h3 class="text-lg font-semibold">עדכון סטטוס</h3>
+                    <select id="status-select" class="w-full p-2 border border-gray-300 rounded-lg">
+                        <option value="פתוחה">פתוחה</option>
+                        <option value="הצבה">הצבה</option>
+                        <option value="החלפה">החלפה</option>
+                        <option value="פינוי">פינוי</option>
+                        <option value="סגורה">סגורה</option>
+                    </select>
+                    <button id="update-status-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">עדכן סטטוס</button>
+                </div>
+                <hr>
+                <div class="space-y-3">
+                    <h3 class="text-lg font-semibold">שלח הודעה ללקוח</h3>
+                    <textarea id="notification-message" rows="3" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="ההזמנה בדרך אליך..."></textarea>
+                    <button id="send-notification-btn" class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition">שלח התראה</button>
+                </div>
+                 <div id="modal-feedback" class="text-center font-semibold"></div>
         </div>
     </div>
-    
-    <div class="splash-screen" id="splash-screen" style="display: none;"></div>
 
     <script>
-    (() => {
-        const state = { isLoggedIn: false, client: null, orders: [], projects: [] };
-        const dom = {
-            loginPage: document.getElementById('page-login'),
-            appContent: document.getElementById('app-content'),
-            loginForm: document.getElementById('login-form'),
-            clientIdInput: document.getElementById('client-id'),
-            userName: document.getElementById('user-name'),
-            userAvatar: document.getElementById('user-avatar'),
-            logoutBtn: document.getElementById('logout-btn'),
-            splashScreen: document.getElementById('splash-screen'),
-            projectFilter: document.getElementById('project-filter'),
-            ordersList: document.getElementById('orders-list'),
-        };
-
-        const API_URL = "https://script.google.com/macros/s/AKfycbxO2oF3254i52Q6khqJQI64GN7fXc3la_p-xv-qHPLdOtB75Bk8AL-MxvPNp5PAF1r6hg/exec";
+    document.addEventListener('DOMContentLoaded', () => {
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwW61P55lY8L-SnA9Of4bB2h0w0K_JVO1Gk-Fq1O60H2qH6R7K8_uT-h4gZtV7lG6dK/exec";
         
-        async function apiPost(body) {
-             try {
-                // Client-side log to see what we are sending
-                console.log('[CLIENT LOG] Sending to API:', body);
-                const response = await fetch(API_URL, { 
-                    method: 'POST', body: JSON.stringify(body), mode: 'cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                const result = await response.json();
-                console.log('[CLIENT LOG] Received from API:', result);
-                if (result.status === 'error') throw new Error(result.message);
-                return result.data;
-            } catch (error) {
-                alert(`שגיאת תקשורת: ${error.message}`);
-                throw error;
-            }
-        }
-        
-        function initApp() {
-            dom.loginForm.addEventListener('submit', handleLogin);
-            dom.logoutBtn.addEventListener('click', handleLogout);
-            dom.projectFilter.addEventListener('change', () => renderDashboard());
+        let allOrders = [];
+// ... existing code ... -->
+                    <p><strong>הערות:</strong></p><p>${order['הערות'] || 'אין'}</p>
+                </div>
+            `;
+            dom.statusSelect.value = order['סטטוס'];
+            dom.updateStatusBtn.dataset.orderId = order['תעודה'];
+            // CORRECTED: Using 'מספר לקוח' to match your Code.js and the unified script
+            dom.sendNotificationBtn.dataset.clientId = order['מספר לקוח']; 
+            dom.sendNotificationBtn.dataset.orderId = order['תעודה'];
+            dom.notificationMessage.value = `שלום, עדכון לגבי הזמנה מספר ${order['תעודה']}: `;
+            dom.modalFeedback.textContent = '';
             
-            const savedClientId = localStorage.getItem('saban_clientId');
-            if (savedClientId) {
-                dom.clientIdInput.value = savedClientId;
-                handleLogin({ preventDefault: () => {} });
-            }
-        }
+            dom.modal.classList.remove('hidden');
+// ... existing code ... -->
+        
+        async function handleUpdateStatus() {
+            const orderId = dom.updateStatusBtn.dataset.orderId;
+            const newStatus = dom.statusSelect.value;
+            dom.modalFeedback.textContent = 'מעדכן...';
 
-        async function handleLogin(e) {
-            e.preventDefault();
-            const clientId = dom.clientIdInput.value.trim();
-            if (!clientId) return;
-
-            showSplashScreen();
-            try {
-                const data = await apiPost({ action: 'getClientData', clientId });
-                state.isLoggedIn = true;
-                state.client = data.client;
-                state.orders = data.orders || [];
-                state.projects = data.projects || [];
-                localStorage.setItem('saban_clientId', clientId);
-                updateUI();
-            } finally {
-                hideSplashScreen();
+            const result = await apiCall('updateOrderStatus', { orderId, newStatus });
+            if (result && result.status === 'success') {
+                dom.modalFeedback.textContent = 'סטטוס עודכן בהצלחה!';
+                
+                const orderIndex = allOrders.findIndex(o => o['תעודה'] == orderId);
+// ... existing code ... -->
+            } else {
+                dom.modalFeedback.textContent = 'שגיאה בעדכון הסטטוס.';
             }
         }
         
-        function handleLogout() {
-             localStorage.removeItem('saban_clientId');
-             location.reload();
-        }
-        
-        function updateUI() {
-             if (state.isLoggedIn) {
-                dom.loginPage.style.display = 'none';
-                dom.appContent.style.display = 'block';
-                dom.userName.textContent = state.client.name;
-                dom.userAvatar.src = state.client.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(state.client.name)}&background=004272&color=fff`;
-                populateProjectFilter();
-                renderDashboard();
-             }
-        }
+        async function handleSendNotification() {
+            const clientId = dom.sendNotificationBtn.dataset.clientId;
+            const orderId = dom.sendNotificationBtn.dataset.orderId;
+            const message = dom.notificationMessage.value.trim();
 
-        function populateProjectFilter() {
-            dom.projectFilter.innerHTML = '<option value="all">כל הפרויקטים</option>';
-            state.projects.forEach(project => {
-                const option = document.createElement('option');
-                option.value = project.id;
-                option.textContent = project.name;
-                dom.projectFilter.appendChild(option);
-            });
-        }
-
-        function renderDashboard() {
-            const selectedProjectId = dom.projectFilter.value;
-            dom.ordersList.innerHTML = '';
-
-            const filteredOrders = selectedProjectId === 'all'
-                ? state.orders
-                : state.orders.filter(order => String(order.projectClientId).trim() === selectedProjectId);
-
-            if (!filteredOrders.length) {
-                dom.ordersList.innerHTML = '<p>לא נמצאו הזמנות לפרויקט הנבחר.</p>';
+            if (!clientId) {
+                dom.modalFeedback.textContent = 'שגיאה: לא נמצא מזהה לקוח.';
+                return;
+            }
+            if (!message) {
+                alert('יש להזין תוכן להודעה.');
                 return;
             }
             
-            filteredOrders.forEach(order => {
-                const card = document.createElement('div');
-                card.className = 'order-card';
-                card.innerHTML = `
-                    <div><strong>הזמנה #${order.id}</strong></div>
-                    <div class="project-name">${order.projectName}</div>
-                    <div>סטטוס: ${order.status}</div>
-                `;
-                dom.ordersList.appendChild(card);
+            dom.modalFeedback.textContent = 'שולח...';
+            
+            const result = await apiCall('sendNotificationToClient', { 
+                clientId: clientId, 
+                title: `עדכון להזמנה ${orderId}`, 
+                body: message 
             });
+
+             if (result && result.status === 'success') {
+                dom.modalFeedback.textContent = 'ההתראה נשלחה בהצלחה!';
+                setTimeout(() => {
+                   dom.modalFeedback.textContent = '';
+                }, 2000);
+            } else {
+                dom.modalFeedback.textContent = 'שגיאה בשליחת ההתראה.';
+            }
         }
 
-        function showSplashScreen() {
-            dom.splashScreen.style.display = 'flex';
-            dom.splashScreen.classList.remove('hidden');
-        }
-        function hideSplashScreen() {
-            setTimeout(() => dom.splashScreen.classList.add('hidden'), 500);
-        }
-        
-        document.addEventListener('DOMContentLoaded', initApp);
-    })();
-    </script>
-</body>
-</html>
+        async function init() {
+            const result = await apiCall('getAdminData');
+            if (result && result.data && result.data.orders) {
+                allOrders = result.data.orders;
+                renderOrders(allOrders);
+                updateDashboardCounts();
+                prepareChartData();
+            }
+
+            dom.searchInput.addEventListener('input', filterOrders);
+// ... existing code ... -->
 
