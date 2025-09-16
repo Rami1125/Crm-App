@@ -119,81 +119,10 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // UPDATED: Using the new deployment URL you provided.
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKKoSTy50_PiUA6sc6FwFR4X8aJhWETvzaC5ick2v1Rs0LIFRs2Uj-bGKWYDrr4odqiA/exec";
         
         let allOrders = [];
-// ... existing code ... -->
-                    <p><strong>הערות:</strong></p><p>${order['הערות'] || 'אין'}</p>
-                </div>
-            `;
-            dom.statusSelect.value = order['סטטוס'];
-            dom.updateStatusBtn.dataset.orderId = order['תעודה'];
-            // CORRECTED: Using 'מספר לקוח' to match your Code.js and the unified script
-            dom.sendNotificationBtn.dataset.clientId = order['מספר לקוח']; 
-            dom.sendNotificationBtn.dataset.orderId = order['תעודה'];
-            dom.notificationMessage.value = `שלום, עדכון לגבי הזמנה מספר ${order['תעודה']}: `;
-            dom.modalFeedback.textContent = '';
-            
-            dom.modal.classList.remove('hidden');
-// ... existing code ... -->
-        
-        async function handleUpdateStatus() {
-            const orderId = dom.updateStatusBtn.dataset.orderId;
-            const newStatus = dom.statusSelect.value;
-            dom.modalFeedback.textContent = 'מעדכן...';
-
-            const result = await apiCall('updateOrderStatus', { orderId, newStatus });
-            if (result && result.status === 'success') {
-                dom.modalFeedback.textContent = 'סטטוס עודכן בהצלחה!';
-                
-                const orderIndex = allOrders.findIndex(o => o['תעודה'] == orderId);
-// ... existing code ... -->
-            } else {
-                dom.modalFeedback.textContent = 'שגיאה בעדכון הסטטוס.';
-            }
-        }
-        
-        async function handleSendNotification() {
-            const clientId = dom.sendNotificationBtn.dataset.clientId;
-            const orderId = dom.sendNotificationBtn.dataset.orderId;
-            const message = dom.notificationMessage.value.trim();
-
-            if (!clientId) {
-                dom.modalFeedback.textContent = 'שגיאה: לא נמצא מזהה לקוח.';
-                return;
-            }
-            if (!message) {
-                alert('יש להזין תוכן להודעה.');
-                return;
-            }
-            
-            dom.modalFeedback.textContent = 'שולח...';
-            
-            const result = await apiCall('sendNotificationToClient', { 
-                clientId: clientId, 
-                title: `עדכון להזמנה ${orderId}`, 
-                body: message 
-            });
-
-             if (result && result.status === 'success') {
-                dom.modalFeedback.textContent = 'ההתראה נשלחה בהצלחה!';
-                setTimeout(() => {
-                   dom.modalFeedback.textContent = '';
-                }, 2000);
-            } else {
-                dom.modalFeedback.textContent = 'שגיאה בשליחת ההתראה.';
-            }
-        }
-
-        async function init() {
-            const result = await apiCall('getAdminData');
-            if (result && result.data && result.data.orders) {
-                allOrders = result.data.orders;
-                renderOrders(allOrders);
-                updateDashboardCounts();
-                prepareChartData();
-            }
-
-            dom.searchInput.addEventListener('input', filterOrders);
+        let statusChart = null;
 // ... existing code ... -->
 
